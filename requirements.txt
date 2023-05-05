@@ -1,0 +1,13 @@
+django==4.1
+Pillow 
+pylint
+pylint-django
+django-bower
+xlwt
+xlrd
+pandas
+django-mathfilters
+djangorestframework
+psycopg2==2.8.5
+djangorestframework
+django-manifest-loader
