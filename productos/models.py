@@ -3,6 +3,8 @@ import base64
 from django.core.files import File
 import os
 from django.conf import settings
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 # Create your models here.
 
 class Categoria(models.Model):
@@ -12,13 +14,15 @@ class Categoria(models.Model):
     def __str__(self):
         return self.nombre
 
+
 class Productos(models.Model):
     nombre=models.CharField(max_length=150,blank=False,null=False)
-    precio=models.CharField(max_length=20,blank=False,null=False)
+    precio=models.IntegerField(blank=False,null=False)
     fecha_elaboracion=models.DateField(auto_now=False,auto_now_add=False)
     fecha_vencimiento=models.DateField(auto_now=False,auto_now_add=False)
-    categoria=models.CharField(max_length=150,blank=False,null=False)
+    categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True)
     imagen=models.ImageField(upload_to='productos/',blank=False,null=True)
+    estado=models.CharField(max_length=150,blank=True,null=True,default=True)
     def imagen_base64(self):
         if self.imagen and hasattr(self.imagen, 'url'):
             with self.imagen.open(mode='rb') as f:
@@ -37,4 +41,9 @@ class Productos(models.Model):
         ordering = ['id']
     def __str__(self):
         return self.nombre
+    @receiver(pre_delete, sender=Categoria)
+    def set_productos_estado_false(sender, instance, **kwargs):
+        productos = Productos.objects.filter(categoria=instance)
+        productos.update(estado=False)
+    
     

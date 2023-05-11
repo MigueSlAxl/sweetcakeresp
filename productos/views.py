@@ -7,7 +7,7 @@ from rest_framework.decorators import (api_view, authentication_classes, permiss
 from drf_extra_fields.fields import Base64ImageField
 from django.http import JsonResponse
 import base64
-from productos.models import Productos
+from productos.models import Categoria, Productos
 from django.core.files.base import ContentFile
 from django.conf import settings
 from PIL import Image
@@ -17,7 +17,7 @@ class ProductoSerializadorImagenJson(serializers.ModelSerializer):
     imagen=Base64ImageField(required=False)
     class Meta:
         model=Productos
-        fields=['id','nombre','precio','fecha_elaboracion','fecha_vencimiento','categoria','imagen']
+        fields=['id','nombre','precio','fecha_elaboracion','fecha_vencimiento','categoria','imagen','estado']
 
 @api_view(['POST'])
 def productos_productos_add_rest(request, format=None):
@@ -28,12 +28,13 @@ def productos_productos_add_rest(request, format=None):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
 class ProductosSerializer(serializers.ModelSerializer):
     imagen = serializers.SerializerMethodField()
 
     class Meta:
         model = Productos
-        fields = ('id', 'nombre', 'precio', 'fecha_elaboracion', 'fecha_vencimiento', 'categoria', 'imagen')
+        fields = ('id', 'nombre', 'precio', 'fecha_elaboracion', 'fecha_vencimiento', 'categoria', 'imagen','estado')
 
     def get_imagen(self, obj):
         return obj.imagen_base64()
@@ -111,6 +112,72 @@ def productos_productos_delete_rest(request, format=None):
             else:
                 return Response({'Ingrese un número entero'})
         except Productos.DoesNotExist:
+            return Response({'No existe la ID en la BBDD'})
+        except ValueError:
+            return Response({'Dato inválido'})
+    else: 
+        return Response({"Error método no soportado"})
+    
+
+
+#categoria
+
+@api_view(['POST'])
+def productos_categoria_add_rest(request, format=None):
+    if request.method == 'POST':
+            nombre=request.data['nombre']
+            Categoria_save = Categoria(
+                nombre = nombre,
+                )
+            Categoria_save.save()
+            return Response({'Msj':"Categoria Creada"})
+    else:
+       return Response({'Msj': "Error método no soportado"})
+    
+@api_view(['GET'])
+def productos_categoria_list_rest(request, format=None):
+    if request.method == 'GET':
+        categoria_list = Categoria.objects.all()
+        categoria_json = []
+        for es in categoria_list:
+            categoria_json.append({'id':es.id,'nombre':es.nombre})
+        return Response({'List':categoria_json})
+    else:
+        return Response({'Msj':"Error método no soportado"})
+    
+@api_view(['POST'])
+def productos_categoria_update_rest(request, format=None):
+    if request.method == 'POST':
+        try:
+            categoria_id=request.data['id']
+            nombre=request.data['nombre']
+            if nombre != '':
+                Categoria.objects.filter(pk=categoria_id).update(nombre=nombre)
+                categoria_json=[]
+                categoria_array = Categoria.objects.get(pk=categoria_id)
+                categoria_json.append({'id':categoria_array.id,'nombre':categoria_array.nombre})
+                return Response({'Msj':"Datos Actualizados",categoria_array.nombre:categoria_json}) 
+            else:
+                return Response({'Msj': "Error los datos no pueden estar en blanco"})
+        except Categoria.DoesNotExist:
+            return Response({'Msj':"Error no hay coincidencias"})
+        except ValueError:
+            return Response({'Msj':"Valor no soportado"})
+    else:
+        return Response({'Msj': "Error método no soportado"})
+    
+@api_view(['POST'])
+def productos_categoria_delete_rest(request, format=None):
+    if request.method =='POST':
+        try: 
+            id = request.data['id']
+            if isinstance(id, int):
+                categoria_array=Categoria.objects.get(pk=id)
+                categoria_array.delete()
+                return Response({'Categoria eliminada con éxito'})
+            else:
+                return Response({'Ingrese un número entero'})
+        except Categoria.DoesNotExist:
             return Response({'No existe la ID en la BBDD'})
         except ValueError:
             return Response({'Dato inválido'})

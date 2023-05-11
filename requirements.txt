@@ -1,4 +1,4 @@
-django==4.1
+django
 Pillow 
 pylint
 pylint-django
@@ -8,6 +8,10 @@ xlrd
 pandas
 django-mathfilters
 djangorestframework
-psycopg2==2.8.5
-djangorestframework
+psycopg2
 django-manifest-loader
+drf_extra_fields
+django-cleanup
+knox
+django-rest-knox
+django-pyodbc-azure
