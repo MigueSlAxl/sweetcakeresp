@@ -3,4 +3,9 @@ accounts/__pycache__/
 accounts/migrations/
 proveedores/__pycache__/
 proveedores/migrations/
+suppliers/__pycache__/
+suppliers/migrations/
+proveedores/__pycache__/
+proveedores/migrations/
+datawholecake/__pycache__/
 media/
