@@ -4,8 +4,8 @@ from django.db import models
 class Supplier(models.Model):
     rut=models.CharField(max_length=150,blank=False,null=False);
     nombre_proveedor=models.CharField(max_length=150,blank=False,null=False)
-    tipo_producto=models.CharField(max_length=150,blank=False,null=False)
-    correo_proveedor=models.CharField(max_length=150,blank=False,null=False)
+    tipo_insumo=models.CharField(max_length=150,blank=False,null=False)
+    correo_proveedor=models.EmailField(max_length=150,blank=False,null=False)
     telefono_proveedor=models.IntegerField(blank=False,null=False)
     class Meta:
         ordering = ['id']
