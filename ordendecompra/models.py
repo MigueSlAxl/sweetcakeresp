@@ -1,7 +1,6 @@
 from django.db import models
 from suppliers.models import Supplier
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+
 # Create your models here.
 class OrdenDC(models.Model):
     fecha=models.DateTimeField(auto_now_add=True)
@@ -12,3 +11,5 @@ class OrdenDC(models.Model):
         ordering = ['id']
     def __str__(self):
         return self.proveedor.nombre_proveedor
+    
+    
