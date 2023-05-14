@@ -3,27 +3,26 @@ from rest_framework.decorators import (api_view, authentication_classes, permiss
 from .models import Supplier
 from django.http import JsonResponse
 from rest_framework.response import Response
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, viewsets, serializers,status
 # Create your views here.
+
+class SupplierSerializadorImagenJson(serializers.ModelSerializer):
+    class Meta:
+        model=Supplier
+        fields=['id','nombre_proveedor','rut','tipo_insumo','correo_proveedor','telefono_proveedor']
 
 @api_view(['POST'])
 def suppliers_suppliers_add_rest(request, format=None):
     if request.method == 'POST':
-            nombre_proveedor=request.data['nombre_proveedor']
-            rut=request.data['rut']
-            tipo_insumo=request.data['tipo_insumo']
-            correo_proveedor=request.data['correo_proveedor']
-            telefono_proveedor=request.data['telefono_proveedor']
-            Categoria_save = Supplier(
-                nombre = nombre_proveedor,
-                rut=rut,
-                tipo_insumo=tipo_insumo,
-                correo_proveedor=correo_proveedor,
-                telefono_proveedor=telefono_proveedor,
-                )
-            Categoria_save.save()
-            return Response({'Msj':"Proveedor Creada"})
-    else:
-       return Response({'Msj': "Error método no soportado"})
+        serializer = SupplierSerializadorImagenJson(data=request.data)
+        if serializer.is_valid():
+            supplier = serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BADsuppliers)
     
 
 @api_view(['GET'])

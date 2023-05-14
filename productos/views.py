@@ -122,17 +122,20 @@ def productos_productos_delete_rest(request, format=None):
 
 #categoria
 
+class CategoriaSerializadorImagenJson(serializers.ModelSerializer):
+    class Meta:
+        model=Categoria
+        fields=['id','nombre']
+
 @api_view(['POST'])
 def productos_categoria_add_rest(request, format=None):
     if request.method == 'POST':
-            nombre=request.data['nombre']
-            Categoria_save = Categoria(
-                nombre = nombre,
-                )
-            Categoria_save.save()
-            return Response({'Msj':"Categoria Creada"})
-    else:
-       return Response({'Msj': "Error método no soportado"})
+        serializer = CategoriaSerializadorImagenJson(data=request.data)
+        if serializer.is_valid():
+            Categoria = serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(['GET'])
 def productos_categoria_list_rest(request, format=None):
