@@ -20,11 +20,13 @@ from django.conf.urls.static import static
 from productos.urls import productos_urlpatterns
 from accounts.urls import accounts_urlpatterns
 from suppliers.urls import suppliers_urlpatterns
+from ordendecompra.urls import ordendc_urlpatterns
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include(accounts_urlpatterns)),
     path('productos/',include(productos_urlpatterns)),
     path('suppliers/',include(suppliers_urlpatterns)),
+    path('ordendc/',include(ordendc_urlpatterns)),
 ]
 admin.site.site_header = 'Wholecake'
 admin.site.site_title = 'Wholecake'    

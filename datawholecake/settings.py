@@ -43,9 +43,10 @@ INSTALLED_APPS = [
     'knox',
     'rest_framework',
     'productos',
-    'proveedores',
     'accounts',
-    'suppliers'
+    'suppliers',
+    'ordendecompra',
+    'insumos',
 ]
 
 MIDDLEWARE = [

@@ -1,9 +1,5 @@
-from django.urls import path,include
+from django.urls import path
 from productos import views
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework import routers
-from rest_framework.urlpatterns import format_suffix_patterns
-
 
 productos_urlpatterns=[
     path('productos_productos_add_rest/',views.productos_productos_add_rest),

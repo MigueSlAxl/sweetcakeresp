@@ -7,5 +7,8 @@ suppliers/__pycache__/
 suppliers/migrations/
 proveedores/__pycache__/
 proveedores/migrations/
+insumos/__pycache__/
+insumos/migrations/
+ordendecompra/__pycache__/
+ordendecompra/migrations/
 datawholecake/__pycache__/
-media/
