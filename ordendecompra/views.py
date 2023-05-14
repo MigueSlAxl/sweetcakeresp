@@ -30,3 +30,46 @@ def ordendc_ordendc_list_rest(request, format=None):
         return Response({'ListODC':ordendc_json})
     else:
         return Response({'Msj':"Error método no soportado"})
+    
+@api_view(['POST'])
+def ordendc_ordendc_update_rest(request, format=None):
+    if request.method == 'POST':
+        try:
+            ordendc_id=request.data['id']
+            proveedor=request.data['proveedor']
+            cantidad=request.data['cantidad']
+            costotal=request.data['costotal']
+            if proveedor != '':
+                OrdenDC.objects.filter(pk=ordendc_id).update(proveedor=proveedor)
+                OrdenDC.objects.filter(pk=ordendc_id).update(cantidad=cantidad)
+                OrdenDC.objects.filter(pk=ordendc_id).update(costotal=costotal)
+                ordendc_json=[]
+                ordendc_array = OrdenDC.objects.get(pk=ordendc_id)
+                ordendc_json.append({'id':ordendc_array.id,'proveedor':ordendc_array.proveedor,'cantidad':ordendc_array.cantidad,'costotal':ordendc_array.costotal})
+                return Response({'Msj':"Datos Actualizados",ordendc_array.nombre:ordendc_json})
+            else:
+                return Response({'Msj': "Error los datos no pueden estar en blanco"})
+        except OrdenDC.DoesNotExist:
+            return Response({'Msj':"Error no hay coincidencias"})
+        except ValueError:
+            return Response({'Msj':"Valor no soportado"})
+    else:
+        return Response({'Msj': "Error método no soportado"})
+    
+@api_view(['POST'])
+def ordendc_ordendc_delete_rest(request, format=None):
+    if request.method =='POST':
+        try: 
+            id = request.data['id']
+            if isinstance(id, int):
+                ordendc=OrdenDC.objects.get(pk=id)
+                ordendc.delete()
+                return Response({'Categoria eliminada con éxito'})
+            else:
+                return Response({'Ingrese un número entero'})
+        except OrdenDC.DoesNotExist:
+            return Response({'No existe la ID en la BBDD'})
+        except ValueError:
+            return Response({'Dato inválido'})
+    else: 
+        return Response({"Error método no soportado"})
