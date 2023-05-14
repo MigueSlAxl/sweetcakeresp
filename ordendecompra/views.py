@@ -26,8 +26,8 @@ def ordendc_ordendc_list_rest(request, format=None):
         ordendc_list = OrdenDC.objects.all()
         ordendc_json = []
         for es in ordendc_list:
-            ordendc_json.append({'id':es.id,'nombre':es.fecha,'cantidad':es.cantidad,'costotal':es.costotal,'proveedor':es.proveedor})
-        return Response({'ListODC':ordendc_json})
+            ordendc_json.append({'id':es.id,'fecha':es.fecha,'cantidad':es.cantidad,'costotal':es.costotal,'proveedor':es.proveedor.id})
+        return Response({'ListOdc':ordendc_json})
     else:
         return Response({'Msj':"Error método no soportado"})
     
