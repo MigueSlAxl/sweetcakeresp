@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'suppliers',
     'ordendecompra',
     'insumos',
+    'supplies'
 ]
 
 MIDDLEWARE = [
@@ -86,10 +87,10 @@ WSGI_APPLICATION = 'datawholecake.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'sweetcake',
+        'NAME': 'sweetcake1',
         'USER': 'postgres',
-        'PASSWORD': 'kissisl0ve',
-        'HOST': 'sweetcake.cthtgt09opzq.us-east-1.rds.amazonaws.com',
+        'PASSWORD': 'Nari',
+        'HOST': 'localhost',
         'DATABASES_PORT': '5432',
     }
 }
