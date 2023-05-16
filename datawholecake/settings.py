@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'accounts',
     'suppliers',
     'ordendecompra',
-    'insumos',
     'supplies'
 ]
 

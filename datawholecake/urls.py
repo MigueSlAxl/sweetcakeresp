@@ -22,6 +22,8 @@ from accounts.urls import accounts_urlpatterns
 from suppliers.urls import suppliers_urlpatterns
 from ordendecompra.urls import ordendc_urlpatterns
 from supplies.urls import supplies_urlpatterns
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include(accounts_urlpatterns)),
@@ -30,7 +32,8 @@ urlpatterns = [
     path('ordendc/',include(ordendc_urlpatterns)),
     path('supplies/',include(supplies_urlpatterns)),
 ]
+
 admin.site.site_header = 'Wholecake'
 admin.site.site_title = 'Wholecake'    
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

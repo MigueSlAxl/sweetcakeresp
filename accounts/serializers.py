@@ -48,7 +48,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         
 
     def create(self, validated_data):
-        
+        user = User.objects.first()  # Accediendo al Manager desde una instancia del modelo
         username = validated_data.get('username')    
         password = validated_data.get('password')
         email = validated_data.get('email')
