@@ -37,16 +37,16 @@ def supplies_update_rest(request , format =None):
         estado=request.data['estado']
         marca_producto = request.data['marca_producto']
         cantidad = request.data['cantidad']
+        tipo_insumo= request.data['tipo_insumo']
         imagen_supplies=request.data.get('imagen_supplies')
         if imagen_supplies: 
             image_data = base64.b64decode(imagen_supplies)
             image =Image.open(ContentFile(image_data))
-            
             supplies = Supplies.objects.get(pk=id)
             supplies.nombre_insumo = nombre_insumo
             supplies.fecha_llegada = fecha_llegada
             supplies.fecha_vencimiento = fecha_vencimiento
-
+            supplies.tipo_insumo = tipo_insumo
             supplies.marca_producto = marca_producto
             supplies.cantidad = cantidad
             supplies.imagen.save(f'{supplies.id}.png', ContentFile(image_data), save=True)
@@ -57,6 +57,7 @@ def supplies_update_rest(request , format =None):
                     image_data = f.read()
             
                 Supplies.objects.filter(pk=id).update(nombre_insumo= nombre_insumo)
+                Supplies.objects.filter(pk=id).update(tipo_insumo= tipo_insumo)
                 Supplies.objects.filter(pk=id).update(fecha_llegada= fecha_llegada)
                 Supplies.objects.filter(pk=id).update(fecha_vencimiento= fecha_vencimiento)
                 Supplies.objects.filter(pk=id).update(estado= estado)
@@ -72,6 +73,7 @@ def supplies_update_rest(request , format =None):
                     'fecha_vencimiento' :supplies_array.fecha_vencimiento,
                     'estado' : supplies_array.estado, 
                     'marca_producto' : supplies_array.marca_producto,
+                    'tipo_insumo' : supplies_array.tipo_insumo,
                     'cantidad' : supplies_array.cantidad,})
 
                 return Response({'Msj':"Datos Actualizados",supplies_array.nombre_insumo:supplies_json}) 

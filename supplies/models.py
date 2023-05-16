@@ -29,8 +29,6 @@ class Supplies(models.Model):
         return self.nombre_insumo
     
 
-
-
 def create_supplies(sender, instance, created, **kwargs):
     if created:
         Supplies.objects.create(
@@ -38,12 +36,11 @@ def create_supplies(sender, instance, created, **kwargs):
             cantidad=instance.cantidad,
             preciounidad=(instance.costotal / instance.cantidad),
             nombre_insumo=instance.proveedor.tipo_insumo,
+            proveedor= instance.proveedor.id,
             estado='En progreso',
             imagen_supplies=instance.proveedor.imagen_insumo, 
-            numero_lote = str(instance.proveedor.id)  + str(instance.id) + str(instance.fecha.strftime("%Y%m%d"))
+            numero_lote = str(instance.proveedor.id)  + str(instance.id) + str(instance.fecha.strftime("%Y%m%d%H%M"))
         )
-
-
 
 post_save.connect(create_supplies, sender=OrdenDC)
 
