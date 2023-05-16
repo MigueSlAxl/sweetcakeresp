@@ -8,7 +8,7 @@ from .models import OrdenDC
 class OrdendcSerializadorImagenJson(serializers.ModelSerializer):
     class Meta:
         model=OrdenDC
-        fields=['id','fecha','proveedor','cantidad','costototal']
+        fields=['id','fecha','proveedor','cantidad','costotal' ]
 
 @api_view(['POST'])
 def ordendc_ordendc_add_rest(request, format=None):
@@ -30,7 +30,8 @@ def ordendc_ordendc_list_rest(request, format=None):
         return Response({'ListOdc':ordendc_json})
     else:
         return Response({'Msj':"Error método no soportado"})
-    
+
+
 @api_view(['POST'])
 def ordendc_ordendc_update_rest(request, format=None):
     if request.method == 'POST':

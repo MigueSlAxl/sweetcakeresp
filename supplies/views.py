@@ -26,6 +26,7 @@ def supplies_add_rest(request, format=None):
             return Response (serializers.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 @api_view(['POST']) 
 def supplies_update_rest(request , format =None):
     if request.method == 'POST' : 
@@ -33,9 +34,7 @@ def supplies_update_rest(request , format =None):
         nombre_insumo = request.data['nombre_insumo']
         fecha_llegada = request.data['fecha_llegada']
         fecha_vencimiento=request.data['fecha_vencimiento']
-        proveedor=request.data['proveedor']
-        tipo_insumo = request.data['tipo_insumo']
-        numero_lote=request.data['numero_lote']
+        estado=request.data['estado']
         marca_producto = request.data['marca_producto']
         cantidad = request.data['cantidad']
         imagen_supplies=request.data.get('imagen_supplies')
@@ -47,24 +46,20 @@ def supplies_update_rest(request , format =None):
             supplies.nombre_insumo = nombre_insumo
             supplies.fecha_llegada = fecha_llegada
             supplies.fecha_vencimiento = fecha_vencimiento
-            supplies.proveedor = proveedor
-            supplies.tipo_insumo = tipo_insumo
-            supplies.numero_lote = numero_lote
+
             supplies.marca_producto = marca_producto
             supplies.cantidad = cantidad
             supplies.imagen.save(f'{supplies.id}.png', ContentFile(image_data), save=True)
         else:
                 # Si no se proporciona una imagen, establecer imagen_data como None y cargar la imagen predeterminada
-                image_path = os.path.join(settings.MEDIA_ROOT, 'productos/default.jpg')
+                image_path = os.path.join(settings.MEDIA_ROOT, 'supplies/default2.jpg')
                 with open(image_path, 'rb') as f:
                     image_data = f.read()
             
                 Supplies.objects.filter(pk=id).update(nombre_insumo= nombre_insumo)
                 Supplies.objects.filter(pk=id).update(fecha_llegada= fecha_llegada)
                 Supplies.objects.filter(pk=id).update(fecha_vencimiento= fecha_vencimiento)
-                Supplies.objects.filter(pk=id).update(proveedor= proveedor)
-                Supplies.objects.filter(pk=id).update(tipo_insumo= tipo_insumo)
-                Supplies.objects.filter(pk=id).update(numero_lote= numero_lote)
+                Supplies.objects.filter(pk=id).update(estado= estado)
                 Supplies.objects.filter(pk=id).update(marca_producto= marca_producto)
                 Supplies.objects.filter(pk=id).update(cantidad= cantidad)
                 
@@ -75,12 +70,10 @@ def supplies_update_rest(request , format =None):
                     'nombre_insumo' : supplies_array.nombre_insumo,
                     'fecha_llegada' : supplies_array.fecha_llegada,
                     'fecha_vencimiento' :supplies_array.fecha_vencimiento,
-                    'proveedor' : supplies_array.proveedor, 
-                    'tipo_insumo' : supplies_array.tipo_insumo, 
-                    'numero_lote' : supplies_array.numero_lote, 
+                    'estado' : supplies_array.estado, 
                     'marca_producto' : supplies_array.marca_producto,
                     'cantidad' : supplies_array.cantidad,})
-                
+
                 return Response({'Msj':"Datos Actualizados",supplies_array.nombre_insumo:supplies_json}) 
         if Supplies.DoesNotExist:
                     return Response({'Msj':"Error no hay coincidencias"})
@@ -93,6 +86,26 @@ def supplies_update_rest(request , format =None):
 
 
 @api_view(['GET'])
+def supplies_list_rest_estadocorrecto(request, format=None):
+    if request.method == 'GET' : 
+        supplies_list = Supplies.objects.filter(estado= 'Correcto' or 'correcto')
+        serializers = SuppliesSerializer (supplies_list, many = True)
+        return JsonResponse({'List' : serializers.data} , safe=False)
+    else:
+        return Response({'Msj':"Error método no soportado"})
+
+
+
+@api_view(['GET'])
+def supplies_list_rest_estadoprogreso(request, format=None):
+    if request.method == 'GET' : 
+        supplies_list = Supplies.objects.filter(estado= 'En progreso' or 'en progreso')
+        serializers = SuppliesSerializer (supplies_list, many = True)
+        return JsonResponse({'List' : serializers.data} , safe=False)
+    else:
+        return Response({'Msj':"Error método no soportado"})
+
+@api_view(['GET'])
 def supplies_list_rest(request, format=None):
     if request.method == 'GET' : 
         supplies_list = Supplies.objects.all()
@@ -100,8 +113,6 @@ def supplies_list_rest(request, format=None):
         return JsonResponse({'List' : serializers.data} , safe=False)
     else:
         return Response({'Msj':"Error método no soportado"})
-
-
 
 
 
