@@ -5,6 +5,7 @@ import os
 from django.conf import settings
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+import slugify
 # Create your models here.
 
 class Categoria(models.Model):
@@ -23,6 +24,8 @@ class Productos(models.Model):
     categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True)
     imagen=models.ImageField(upload_to='productos/',blank=False,null=True)
     estado=models.CharField(max_length=150,blank=True,null=True,default=True)
+    cantidad=models.PositiveIntegerField(blank=False,null=False)
+    lote=models.CharField(max_length=150,blank=False,null=False)
     def imagen_base64(self):
         if self.imagen and hasattr(self.imagen, 'url'):
             with self.imagen.open(mode='rb') as f:

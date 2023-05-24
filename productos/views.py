@@ -1,3 +1,4 @@
+import datetime
 from io import BytesIO
 from django.shortcuts import render
 from rest_framework import generics, viewsets, serializers,status
@@ -17,7 +18,7 @@ class ProductoSerializadorImagenJson(serializers.ModelSerializer):
     imagen=Base64ImageField(required=False)
     class Meta:
         model=Productos
-        fields=['id','nombre','precio','fecha_elaboracion','fecha_vencimiento','categoria','imagen','estado']
+        fields=['id','nombre','precio','fecha_elaboracion','fecha_vencimiento','categoria','imagen','estado','cantidad']
 
 @api_view(['POST'])
 def productos_productos_add_rest(request, format=None):
@@ -25,7 +26,17 @@ def productos_productos_add_rest(request, format=None):
         serializer = ProductoSerializadorImagenJson(data=request.data)
         if serializer.is_valid():
             producto = serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            nombre = producto.nombre
+            categoria_id = producto.categoria.id
+            lote = f"{nombre[:2]}-{categoria_id}"
+
+            # Asignar el lote generado al producto
+            producto.lote = lote
+            producto.save()
+            serialized_data = serializer.data
+            serialized_data['lote'] = lote
+
+            return Response(serialized_data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
@@ -34,7 +45,7 @@ class ProductosSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Productos
-        fields = ('id', 'nombre', 'precio', 'fecha_elaboracion', 'fecha_vencimiento', 'categoria', 'imagen','estado')
+        fields = ('id', 'nombre', 'precio', 'fecha_elaboracion', 'fecha_vencimiento', 'categoria','estado','cantidad','lote', 'imagen')
 
     def get_imagen(self, obj):
         return obj.imagen_base64()
@@ -54,10 +65,12 @@ def productos_productos_update_rest(request, format=None):
         try:
             producto_id=request.data['productoId']
             nombre= request.data['nombre']
-            categoria = request.data['categoria']
+            categoria_id = request.data['categoria']
             precio = request.data['precio']
             fecha_elaboracion = request.data['fecha_elaboracion']
             fecha_vencimiento = request.data['fecha_vencimiento']
+            cantidad=request.data['cantidad']
+            lote=request.data['lote']
             imagen=request.data.get('imagen')  # Usar get() para evitar KeyError si la imagen no está presente
             # Si imagen no tiene ningún valor, establecer imagen_data como None y cargar una imagen predeterminada
             if imagen:
@@ -69,10 +82,13 @@ def productos_productos_update_rest(request, format=None):
                 # Guardar la imagen en el modelo de base de datos
                 producto = Productos.objects.get(pk=producto_id)
                 producto.nombre = nombre
+                categoria = Categoria.objects.get(pk=categoria_id)
                 producto.categoria = categoria
                 producto.precio = precio
                 producto.fecha_elaboracion = fecha_elaboracion
                 producto.fecha_vencimiento = fecha_vencimiento
+                producto.cantidad = cantidad
+                producto.lote = lote
                 producto.imagen.save(f'{producto_id}.png', ContentFile(image_data), save=True)
             else:
                 # Si no se proporciona una imagen, establecer imagen_data como None y cargar la imagen predeterminada
@@ -83,20 +99,23 @@ def productos_productos_update_rest(request, format=None):
                 # Guardar la imagen predeterminada en el modelo de base de datos
                 producto = Productos.objects.get(pk=producto_id)
                 producto.nombre = nombre
+                categoria = Categoria.objects.get(pk=categoria_id)
                 producto.categoria = categoria
                 producto.precio = precio
                 producto.fecha_elaboracion = fecha_elaboracion
                 producto.fecha_vencimiento = fecha_vencimiento
+                producto.cantidad = cantidad
+                producto.lote = lote
                 producto.imagen.save(f'{producto_id}.png', ContentFile(image_data), save=True)
             
             # Serializar los datos y enviar la respuesta
             producto_array = Productos.objects.get(pk=producto_id)
-            producto_json={'id':producto_array.id,'nombre':producto_array.nombre,'categoria':producto_array.categoria,'fecha_elaboracion':producto_array.fecha_elaboracion,'fecha_vencimiento': producto_array.fecha_vencimiento,'precio':producto_array.precio}
+            producto_json={'id':producto_array.id,'nombre':producto_array.nombre,'categoria':producto_array.categoria_id,'fecha_elaboracion':producto_array.fecha_elaboracion,'fecha_vencimiento': producto_array.fecha_vencimiento,'precio':producto_array.precio,'cantidad':producto_array.cantidad,'lote':producto_array.lote}
             return Response({'Msj':"Datos Actualizados",producto_array.nombre:[producto_json]}) 
         except Productos.DoesNotExist:
             return Response({'Msj':"Error no hay coincidencias"})
-        except ValueError:
-            return Response({'Msj':"Valor no soportado"})
+        # except ValueError:
+        #     return Response({'Msj':"Valor no soportado"})
     else:
         return Response({'Msj':"Metodo no soportado"})
 
