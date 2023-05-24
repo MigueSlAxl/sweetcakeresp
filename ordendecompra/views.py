@@ -10,7 +10,7 @@ from .models import OrdenDC
 class OrdendcSerializadorImagenJson(serializers.ModelSerializer):
     class Meta:
         model=OrdenDC
-        fields=['id','fecha','proveedor','cantidad','costototal']
+        fields=['id','fecha','proveedor','cantidad','costotal']
 
 @api_view(['POST'])
 def ordendc_ordendc_add_rest(request, format=None):
