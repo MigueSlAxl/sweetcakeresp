@@ -41,6 +41,7 @@ def ventas_ventas_list_rest(request):
     for venta in ventas:
         detalles_venta = VentaDetalle.objects.filter(venta=venta)
         productos = []
+        total_venta = 0
         for detalle in detalles_venta:
             producto = detalle.producto
             producto_info = {
@@ -51,11 +52,15 @@ def ventas_ventas_list_rest(request):
                 'precio_total': detalle.cantidad * detalle.precio_unitario
             }
             productos.append(producto_info)
+            total_venta += detalle.cantidad * detalle.precio_unitario
+
         venta_info = {
             'id_venta': venta.id,
             'fecha': venta.fecha,
-            'total':venta.total,
+            'total': total_venta,
             'productos': productos
         }
         resultado.append(venta_info)
-    return Response(resultado)
+
+    respuesta = {'listventas': resultado}
+    return Response(respuesta)

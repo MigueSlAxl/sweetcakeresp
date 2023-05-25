@@ -1,14 +1,17 @@
 
 accounts/__pycache__/
 accounts/migrations/
-proveedores/__pycache__/
-proveedores/migrations/
 suppliers/__pycache__/
 suppliers/migrations/
-proveedores/__pycache__/
-proveedores/migrations/
-insumos/__pycache__/
-insumos/migrations/
 ordendecompra/__pycache__/
 ordendecompra/migrations/
 datawholecake/__pycache__/
+ventas/__pycache__/
+ventas/migrations/
+media/
+datawholecake/__pycache__/
+datawholecake/settings.py
+productos/__pycache__/
+productos/migrations/
+supplies/__pycache__/
+supplies/migrations/
