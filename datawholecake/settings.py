@@ -40,8 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'knox',
     'rest_framework',
+    'rest_framework.authtoken',
     'productos',
     'accounts',
     'suppliers',
@@ -49,6 +49,11 @@ INSTALLED_APPS = [
     'supplies',
     'ventas'
 ]
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
