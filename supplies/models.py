@@ -27,7 +27,7 @@ class Supplies(models.Model):
         ordering = ['id']
     def __str__(self) : 
         return self.nombre_insumo
-    
+
 
 def create_supplies(sender, instance, created, **kwargs):
     if created:
@@ -36,10 +36,9 @@ def create_supplies(sender, instance, created, **kwargs):
             cantidad=instance.cantidad,
             preciounidad=(instance.costotal / instance.cantidad),
             nombre_insumo=instance.proveedor.tipo_insumo,
-            proveedor= instance.proveedor.id,
+            proveedor= instance.proveedor.nombre_proveedor,
             estado='En progreso',
-
-            tipo_insumo = 'Por asignar', 
+            tipo_insumo = instance.proveedor.tipo_insumo, 
             marca_producto = 'Por asignar',
             imagen_supplies=instance.proveedor.imagen_insumo, 
             numero_lote = str(instance.proveedor.id)  + str(instance.id) + str(instance.fecha.strftime("%Y%m%d%H%M"))

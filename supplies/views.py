@@ -52,7 +52,7 @@ def supplies_update_rest(request , format =None):
             supplies.imagen.save(f'{supplies.id}.png', ContentFile(image_data), save=True)
         else:
                 # Si no se proporciona una imagen, establecer imagen_data como None y cargar la imagen predeterminada
-                image_path = os.path.join(settings.MEDIA_ROOT, 'supplies/default2.jpg')
+                image_path = os.path.join(settings.MEDIA_ROOT, 'insumo/default.jpg')
                 with open(image_path, 'rb') as f:
                     image_data = f.read()
                 Supplies.objects.filter(pk=id).update(nombre_insumo= nombre_insumo)
@@ -128,7 +128,7 @@ def supplies_delete_rest(request, format=None):
     try:
         supplies = Supplies.objects.get(pk=id)
     except Supplies.DoesNotExist:
-        return Response({'error': 'No existe el usuario'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'No existe el insumo'}, status=status.HTTP_404_NOT_FOUND)
 
     supplies.delete()
-    return Response({'detail': 'Usuario eliminado con éxito'})
+    return Response({'detail': 'Insumo eliminado con éxito'})
