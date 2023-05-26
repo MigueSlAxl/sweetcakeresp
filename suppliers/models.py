@@ -22,7 +22,7 @@ class Supplier(models.Model):
     def save(self, *args, **kwargs):
         if not self.imagen_insumo:
             # asigna la imagen por defecto si no se ha proporcionado una imagen
-            img_path = os.path.join(settings.MEDIA_ROOT, 'insumo/default.jpg')
+            img_path = os.path.join(settings.MEDIA_ROOT, 'default.jpg')
             with open(img_path, 'rb') as f:
                 self.imagen_insumo.save('default.jpg', File(f), save=False)
         super(Supplier, self).save(*args, **kwargs)
