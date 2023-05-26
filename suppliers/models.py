@@ -24,7 +24,7 @@ class Supplier(models.Model):
             # asigna la imagen por defecto si no se ha proporcionado una imagen
             img_path = os.path.join(settings.MEDIA_ROOT, 'insumo/default.jpg')
             with open(img_path, 'rb') as f:
-                self.imagen_insumo.save('insumo/default.jpg', File(f), save=False)
+                self.imagen_insumo.save('default.jpg', File(f), save=False)
         super(Supplier, self).save(*args, **kwargs)
     class Meta:
         ordering = ['id']
