@@ -13,8 +13,8 @@ from datetime import datetime
 class Supplies(models.Model): 
     nombre_insumo = models.CharField(max_length=40 , blank = False , null= False)
     ordendc=models.ForeignKey(OrdenDC,on_delete=models.CASCADE)
-    fecha_llegada = models.DateField(blank=True, null=True)
-    fecha_vencimiento = models.DateField(blank=True, null=True)
+    fecha_llegada = models.DateField(auto_now_add=True,blank=True, null=False)
+    fecha_vencimiento = models.DateField(auto_now_add=True , blank=True, null=False)
     preciounidad=models.IntegerField(blank=False,null=False)
     proveedor = models.CharField(max_length= 30, blank= False , null= False)
     estado=models.CharField(max_length=150,blank=True,null=True)
@@ -38,6 +38,9 @@ def create_supplies(sender, instance, created, **kwargs):
             nombre_insumo=instance.proveedor.tipo_insumo,
             proveedor= instance.proveedor.id,
             estado='En progreso',
+
+            tipo_insumo = 'Por asignar', 
+            marca_producto = 'Por asignar',
             imagen_supplies=instance.proveedor.imagen_insumo, 
             numero_lote = str(instance.proveedor.id)  + str(instance.id) + str(instance.fecha.strftime("%Y%m%d%H%M"))
         )

@@ -12,6 +12,6 @@ class SuppliesSerializer(serializers.ModelSerializer):
     imagen_supplies = Base64ImageField(required = False)
     class Meta: 
         model = Supplies
-        fields =  ( 'id' , 'nombre_insumo', 'fecha_llegada', 'fecha_vencimiento', 'proveedor', 'tipo_insumo',
+        fields =  ( 'id' , 'nombre_insumo', 'fecha_llegada', 'fecha_vencimiento', 'proveedor', 'tipo_insumo','estado',
                     'numero_lote', 'marca_producto',  'cantidad' , 'imagen_supplies')
 

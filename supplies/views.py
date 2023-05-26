@@ -34,7 +34,7 @@ def supplies_update_rest(request , format =None):
         nombre_insumo = request.data['nombre_insumo']
         fecha_llegada = request.data['fecha_llegada']
         fecha_vencimiento=request.data['fecha_vencimiento']
-        estado=request.data['estado']
+        estado=request.data['estado'] 
         marca_producto = request.data['marca_producto']
         cantidad = request.data['cantidad']
         tipo_insumo= request.data['tipo_insumo']
@@ -55,7 +55,6 @@ def supplies_update_rest(request , format =None):
                 image_path = os.path.join(settings.MEDIA_ROOT, 'supplies/default2.jpg')
                 with open(image_path, 'rb') as f:
                     image_data = f.read()
-            
                 Supplies.objects.filter(pk=id).update(nombre_insumo= nombre_insumo)
                 Supplies.objects.filter(pk=id).update(tipo_insumo= tipo_insumo)
                 Supplies.objects.filter(pk=id).update(fecha_llegada= fecha_llegada)
