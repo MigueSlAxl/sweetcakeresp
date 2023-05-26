@@ -38,7 +38,7 @@ class Productos(models.Model):
             # asigna la imagen por defecto si no se ha proporcionado una imagen
             img_path = os.path.join(settings.MEDIA_ROOT, 'productos/default.jpg')
             with open(img_path, 'rb') as f:
-                self.imagen.save('productos/default.jpg', File(f), save=False)
+                self.imagen.save('default.jpg', File(f), save=False)
         super(Productos, self).save(*args, **kwargs)
     class Meta:
         ordering = ['id']
