@@ -6,7 +6,7 @@ from django.conf import settings
 
 # Create your models here.
 class Supplier(models.Model):
-    rut=models.CharField(max_length=150,blank=False,null=False);
+    rut=models.CharField(max_length=150,blank=False,null=False)
     nombre_proveedor=models.CharField(max_length=150,blank=False,null=False)
     tipo_insumo=models.CharField(max_length=150,blank=False,null=False)
     imagen_insumo=models.ImageField(upload_to='insumo/',blank=False,null=True)

@@ -35,7 +35,7 @@ def create_supplies(sender, instance, created, **kwargs):
             ordendc=instance,
             cantidad=instance.cantidad,
             preciounidad=(instance.costotal / instance.cantidad),
-            nombre_insumo=instance.proveedor.tipo_insumo,
+            nombre_insumo="Por asignar",
             proveedor= instance.proveedor.nombre_proveedor,
             estado='En progreso',
             tipo_insumo = instance.proveedor.tipo_insumo, 
