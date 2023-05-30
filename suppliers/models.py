@@ -11,7 +11,7 @@ class Supplier(models.Model):
     tipo_insumo=models.CharField(max_length=150,blank=False,null=False)
     imagen_insumo=models.ImageField(upload_to='insumo/',blank=False,null=True)
     correo_proveedor=models.EmailField(max_length=150,blank=False,null=False)
-    telefono_proveedor=models.IntegerField(blank=False,null=False)
+    telefono_proveedor=models.CharField(max_length=12,blank=False,null=False)
     def imagen_base64(self):
         if self.imagen_insumo and hasattr(self.imagen_insumo, 'url'):
             with self.imagen_insumo.open(mode='rb') as f:

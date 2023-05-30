@@ -40,7 +40,7 @@ def ordendc_ordendc_list_rest(request, format=None):
 def ordendc_ordendc_update_rest(request, format=None):
     if request.method == 'POST':
         try:
-            ordendc_id=request.data['id']
+            ordendc_id=request.data['ordenId']
             proveedor=request.data['proveedor']
             cantidad=request.data['cantidad']
             costotal=request.data['costotal']
@@ -50,8 +50,8 @@ def ordendc_ordendc_update_rest(request, format=None):
                 OrdenDC.objects.filter(pk=ordendc_id).update(costotal=costotal)
                 ordendc_json=[]
                 ordendc_array = OrdenDC.objects.get(pk=ordendc_id)
-                ordendc_json.append({'id':ordendc_array.id,'proveedor':ordendc_array.proveedor,'cantidad':ordendc_array.cantidad,'costotal':ordendc_array.costotal})
-                return Response({'Msj':"Datos Actualizados",ordendc_array.nombre:ordendc_json})
+                ordendc_json.append({'id':ordendc_array.id,'proveedor':ordendc_array.proveedor.nombre_proveedor,'cantidad':ordendc_array.cantidad,'costotal':ordendc_array.costotal})
+                return Response({'Msj':"Datos Actualizados",ordendc_array.proveedor.nombre_proveedor:ordendc_json})
             else:
                 return Response({'Msj': "Error los datos no pueden estar en blanco"})
         except OrdenDC.DoesNotExist:

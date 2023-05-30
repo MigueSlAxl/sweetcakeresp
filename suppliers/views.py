@@ -29,7 +29,7 @@ def suppliers_suppliers_add_rest(request, format=None):
             supplier = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BADsuppliers)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class SupplierSerializer(serializers.ModelSerializer):
     imagen_insumo = serializers.SerializerMethodField()
