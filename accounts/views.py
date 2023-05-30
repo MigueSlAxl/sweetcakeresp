@@ -1,3 +1,5 @@
+import random
+import string
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
@@ -11,6 +13,14 @@ from PIL import Image
 from django.core.files.base import ContentFile
 import base64
 import os
+
+from accounts.serializers import PasswordResetConfirmSerializer, PasswordResetSerializer
+from .models import Profile
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
+from django.views import View
+from rest_framework import status
 
 
 class CustomAuthToken(ObtainAuthToken):
@@ -140,3 +150,50 @@ def user_user_update_rest(request, format=None):
             return Response({'Msj': "Valor no soportado"})
     else:
         return Response({'Msj': "Método no soportado"})
+    
+
+
+@api_view(['POST'])
+def password_reset_email(request):
+    serializer = PasswordResetSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        profile = get_object_or_404(Profile, user__email=email)
+        reset_code = ''.join(random.choices(string.digits, k=6))
+        profile.reset_code = reset_code
+        profile.save()
+        send_mail(
+            'Codigo para reestablecer contraseña',
+            f'Tu codigo es: {reset_code}',
+            settings.EMAIL_HOST_USER,
+            [email],
+            fail_silently=False,
+        )
+
+        return Response({'detalle': 'Codigo para reestablecer contraseña enviado! Revisa tu correo.'}, status=status.HTTP_200_OK)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def password_reset_confirm(request):
+    serializer = PasswordResetConfirmSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        reset_code = serializer.validated_data['reset_code']
+        new_password = serializer.validated_data['new_password']
+
+        profile = get_object_or_404(Profile, user__email=email)
+
+        if profile.reset_code == reset_code:
+            user = profile.user
+            user.set_password(new_password)
+            user.save()
+
+            profile.reset_code = None
+            profile.save()
+
+            return Response({'detalle': 'Contraseña restablecida correctamente.'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'detalle': 'codigo no valido.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
