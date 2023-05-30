@@ -14,7 +14,6 @@ class Profile(models.Model):
     tipo=models.CharField(max_length=150,blank=True,null=True)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, default=1) 
     token_app_session = models.CharField(max_length = 240,null=True, blank=True, default='')
-    first_session = models.CharField(max_length = 240,null=True, blank=True, default='Si')
     rut = models.CharField(max_length=12, blank=True, null=True, verbose_name='RUT')
     direccion = models.CharField(max_length=255, blank=True, null=True, verbose_name='direcciones')
     ntelefono = models.CharField(max_length=15, blank=True, null=True, verbose_name='numero de telefono')

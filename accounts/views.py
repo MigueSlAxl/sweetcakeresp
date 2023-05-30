@@ -40,6 +40,8 @@ def user_user_list_rest(request, format=None):
         profiles = Profile.objects.select_related('user').all()
         profile_list = []
         for profile in profiles:
+            image_data = profile.imagen_user.read()
+            base64_image = base64.b64encode(image_data).decode('utf-8')
             profile_list.append({'id': profile.user.id, 'username': profile.user.username ,
                                 'first_name' : profile.user.first_name,
                                 'last_name' : profile.user.last_name,
@@ -49,7 +51,7 @@ def user_user_list_rest(request, format=None):
                                 'ntelefono' : profile.ntelefono,
                                 'nemergencia' : profile.nemergencia , 
                                 'local' : profile.local,
-                                #'imagen_user' : profile.imagen_user
+                                'imagen_user' : base64_image
                                 })
         return Response({'List': profile_list})
     else:
