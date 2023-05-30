@@ -4,6 +4,15 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 from rest_framework.decorators import (api_view, authentication_classes, permission_classes)
 from rest_framework.permissions import IsAuthenticated
+from accounts.forms import * 
+from django.http import JsonResponse
+from django.conf import settings
+from PIL import Image
+from django.core.files.base import ContentFile
+import base64
+import os
+
+
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
@@ -13,14 +22,119 @@ class CustomAuthToken(ObtainAuthToken):
         token, created = Token.objects.get_or_create(user=user)
         return Response({'token': token.key,'username':user.username,'tipo':user.profile.tipo,'correo':user.username})
     
+# @api_view(['GET'])
+# # Requiere autenticación mediante token
+# def user_user_list_rest(request, format=None):
+#     if request.method == 'GET':
+#         user_list = User.objects.all()
+#         serializers = UserCreation (user_list, many = True)
+#         return JsonResponse({'List' : serializers.data} , safe=False)
+#     else:
+#         return Response({'Msj':"Error método no soportado"})
+
+
+
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])  # Requiere autenticación mediante token
 def user_user_list_rest(request, format=None):
     if request.method == 'GET':
-        user_list = User.objects.all()
-        user_json = []
-        for es in user_list:
-            user_json.append({'id': es.id, 'username': es.username})
-        return Response({'List': user_json})
+        profiles = Profile.objects.select_related('user').all()
+        profile_list = []
+        for profile in profiles:
+            profile_list.append({'id': profile.user.id, 'username': profile.user.username ,
+                                'first_name' : profile.user.first_name,
+                                'last_name' : profile.user.last_name,
+                                'email' : profile.user.email , 
+                                'rut' : profile.rut , 
+                                'direccion' : profile.direccion , 
+                                'ntelefono' : profile.ntelefono,
+                                'nemergencia' : profile.nemergencia , 
+                                'local' : profile.local,
+                                #'imagen_user' : profile.imagen_user
+                                })
+        return Response({'List': profile_list})
     else:
         return Response({'Msj': "Error método no soportado"})
+
+
+#crear usuario como admin
+@api_view(['POST'])
+def user_user_add_rest(request, format=None):
+    if request.method == 'POST':
+        serializer = UserCreation(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            Profile.objects.create()
+            return Response({
+                'tipo' :user.tipo , 'rut' :user.rut
+            })
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(serializer.data, status=status.HTTP_201_CREATED )
+
+
+@api_view(['POST'])
+def user_user_delete_rest(request, format=None):
+    if request.method != 'POST':
+        return Response({'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    try:
+        id = int(request.data['id'])
+    except (KeyError, ValueError):
+        return Response({'error': 'Ingrese un número entero'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        userstandard_array = User.objects.get(pk=id)
+    except User.DoesNotExist:
+        return Response({'error': 'No existe el usuario'}, status=status.HTTP_404_NOT_FOUND)
+
+    userstandard_array.delete()
+    return Response({'detail': 'Usuario eliminado con éxito'})
+
+
+@api_view(['POST'])
+def user_user_update_rest(request, format=None):
+    if request.method == 'POST':
+        try:
+            id = request.data['id']
+            username = request.data['username']
+            tipo = request.data['tipo']
+            rut = request.data['rut']
+            ntelefono = request.data['ntelefono']
+            nemergencia = request.data['nemergencia']
+            local = request.data['local']
+            direccion = request.data['direccion']
+            email = request.data['email']
+            imagen_user = request.data.get('imagen_user')
+
+            user = User.objects.get(pk=id)
+            user.username = username
+            user.email = email
+            user.save()
+            profile = user.profile
+            profile.tipo = tipo
+            profile.rut = rut
+            profile.ntelefono = ntelefono
+            profile.nemergencia = nemergencia
+            profile.local = local
+            profile.direccion = direccion
+            if imagen_user:
+                profile.imagen_user.save(f'{id}.png', ContentFile(base64.b64decode(imagen_user)), save=True)
+            profile.save()
+
+            user_json = {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'tipo': profile.tipo,
+                'rut': profile.rut,
+                'ntelefono': profile.ntelefono,
+                'nemergencia': profile.nemergencia,
+                'local': profile.local,
+                'direccion': profile.direccion
+            }
+            return Response({'Msj': "Datos Actualizados", 'List': user_json})
+        except User.DoesNotExist:
+            return Response({'Msj': "Error no hay coincidencias"})
+        except ValueError:
+            return Response({'Msj': "Valor no soportado"})
+    else:
+        return Response({'Msj': "Método no soportado"})
