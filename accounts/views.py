@@ -244,7 +244,7 @@ def user_admin_add_rest(request, format=None):
         password = request.data.get('password')
         confirm_password = request.data.get('confirm_password')
         imagen_base64 = request.data.get('imagen_user')
-
+        
         if password != confirm_password: 
             return Response({'las contraseñas deben ser iguales'}, status=status.HTTP_400_BAD_REQUEST)
         user = User.objects.create(
@@ -260,6 +260,7 @@ def user_admin_add_rest(request, format=None):
         user.save()
         profile = Profile.objects.create(
             user=user,
+            tipo ="Admin"
         )
         if imagen_base64:
             # Decodificar la imagen base64 y guardarla en el modelo de base de datos
@@ -267,6 +268,10 @@ def user_admin_add_rest(request, format=None):
             ext = format.split('/')[-1]
             image_data = ContentFile(base64.b64decode(imgstr), name=f'{user.id}.{ext}')
             profile.imagen_user.save(f'{user.id}.{ext}', image_data, save=True)
+            token, created = Token.objects.get_or_create(user=user)
+            image_data = user.profile.imagen_user.read()
+            base64_image = base64.b64encode(image_data).decode('utf-8')
+            return Response({'token': token.key,'username':user.username,'tipo':user.profile.tipo,'correo':user.username,'imagen':base64_image})
         
         return Response({'Usuario creado exitosamente'}, status=status.HTTP_201_CREATED)
 
