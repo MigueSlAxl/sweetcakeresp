@@ -1,3 +1,4 @@
+import shutil
 from django.db import models
 import os
 from django.conf import settings
@@ -30,35 +31,40 @@ class Supplies(models.Model):
             return base64.b64encode(img_data).decode('utf-8')
         else:
             return None
+    
     def save(self, *args, **kwargs):
         if not self.imagen_supplies:
-            # asigna la imagen por defecto si no se ha proporcionado una imagen
             img_path = os.path.join(settings.MEDIA_ROOT, 'insumo/default.jpg')
             with open(img_path, 'rb') as f:
                 self.imagen_supplies.save('default.jpg', File(f), save=False)
         super(Supplies, self).save(*args, **kwargs)    
-    class Meta : 
+        
+    class Meta: 
         ordering = ['id']
-    def __str__(self) : 
+    
+    def __str__(self):
         return self.nombre_insumo
 
 
 def create_supplies(sender, instance, created, **kwargs):
     if created:
-        Supplies.objects.create(
+        supplies = Supplies.objects.create(
             ordendc=instance,
             cantidad=instance.cantidad,
             preciounidad=(instance.costotal / instance.cantidad),
             nombre_insumo="Por asignar",
-            proveedor= instance.proveedor.nombre_proveedor,
+            proveedor=instance.proveedor.nombre_proveedor,
             estado='En progreso',
-            tipo_insumo = instance.proveedor.tipo_insumo, 
-            marca_producto = 'Por asignar',
-            imagen_supplies=instance.proveedor.imagen_insumo, 
-            numero_lote = str(instance.proveedor.id)  + str(instance.id) + str(instance.fecha.strftime("%Y%m%d%H%M"))
+            tipo_insumo=instance.proveedor.tipo_insumo, 
+            marca_producto='Por asignar',
+            numero_lote=str(instance.proveedor.id) + str(instance.id) + str(instance.fecha.strftime("%Y%m%d%H%M"))
         )
 
+        if instance.proveedor.imagen_insumo:
+            src_path = instance.proveedor.imagen_insumo.path
+            dst_path = os.path.join(settings.MEDIA_ROOT, 'insumo', f'{supplies.id}.jpg')
+            shutil.copy2(src_path, dst_path) 
+            supplies.imagen_supplies = os.path.join('insumo', f'{supplies.id}.jpg')
+            supplies.save()
+
 post_save.connect(create_supplies, sender=OrdenDC)
-
-
-

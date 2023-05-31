@@ -14,3 +14,5 @@ productos/__pycache__/
 productos/migrations/
 supplies/__pycache__/
 supplies/migrations/
+*.jpg
+*.pyc
