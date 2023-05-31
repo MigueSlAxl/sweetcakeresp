@@ -33,17 +33,6 @@ class CustomAuthToken(ObtainAuthToken):
         image_data = user.profile.imagen_user.read()
         base64_image = base64.b64encode(image_data).decode('utf-8')
         return Response({'token': token.key,'username':user.username,'tipo':user.profile.tipo,'correo':user.username,'imagen':base64_image})
-    
-# @api_view(['GET'])
-# # Requiere autenticación mediante token
-# def user_user_list_rest(request, format=None):
-#     if request.method == 'GET':
-#         user_list = User.objects.all()
-#         serializers = UserCreation (user_list, many = True)
-#         return JsonResponse({'List' : serializers.data} , safe=False)
-#     else:
-#         return Response({'Msj':"Error método no soportado"})
-
 
 
 @api_view(['GET'])
@@ -57,14 +46,15 @@ def user_user_list_rest(request, format=None):
             profile_list.append({'id': profile.user.id, 'username': profile.user.username ,
                                 'first_name' : profile.user.first_name,
                                 'last_name' : profile.user.last_name,
-                                'email' : profile.user.email , 
+                                'email' : profile.user.email ,
+                                'tipo':profile.tipo, 
                                 'rut' : profile.rut , 
                                 'direccion' : profile.direccion , 
                                 'ntelefono' : profile.ntelefono,
                                 'nemergencia' : profile.nemergencia , 
                                 'local' : profile.local,
                                 'imagen_user' : base64_image,
-                                'tipo':profile.tipo
+                                
                                 })
         return Response({'List': profile_list})
     else:
@@ -75,17 +65,47 @@ def user_user_list_rest(request, format=None):
 @api_view(['POST'])
 def user_user_add_rest(request, format=None):
     if request.method == 'POST':
-        serializer = UserCreation(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            Profile.objects.create()
-            return Response({
-                'tipo' :user.tipo , 'rut' :user.rut
-            })
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        username = request.data.get('username')
+        first_name = request.data.get('first_name')
+        last_name = request.data.get('last_name')
+        email = request.data.get('email')
+        password = request.data.get('password')
+        tipo = request.data.get('tipo')
+        rut = request.data.get('rut')
+        ntelefono = request.data.get('ntelefono')
+        nemergencia = request.data.get('nemergencia')
+        local = request.data.get('local')
+        direccion = request.data.get('direccion')
+        imagen_base64 = request.data.get('imagen_user')
+        user = User.objects.create(
+            username = username, 
+            first_name = first_name , 
+            last_name = last_name ,
+            email = email, 
+            password = password,
+        )
+        user.set_password(password)
+        user.save()
+        
+        profile = Profile.objects.create(
+            user=user,
+            tipo=tipo,
+            rut=rut,
+            ntelefono=ntelefono,
+            nemergencia=nemergencia,
+            local=local,
+            direccion=direccion,
+        )
+        if imagen_base64:
+            # Decodificar la imagen base64 y guardarla en el modelo de base de datos
+            format, imgstr = imagen_base64.split(';base64,')
+            ext = format.split('/')[-1]
+            image_data = ContentFile(base64.b64decode(imgstr), name=f'{user.id}.{ext}')
+            profile.imagen_user.save(f'{user.id}.{ext}', image_data, save=True)
+        
+        return Response({'message': 'Usuario creado exitosamente'}, status=status.HTTP_201_CREATED)
 
-    return Response(serializer.data, status=status.HTTP_201_CREATED )
+    return Response({'message': 'Error en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -119,11 +139,12 @@ def user_user_update_rest(request, format=None):
             direccion = request.data['direccion']
             email = request.data['email']
             imagen_user = request.data.get('imagen_user')
-
+            
             user = User.objects.get(pk=id)
             user.username = username
             user.email = email
             user.save()
+
             profile = user.profile
             profile.tipo = tipo
             profile.rut = rut
@@ -131,8 +152,15 @@ def user_user_update_rest(request, format=None):
             profile.nemergencia = nemergencia
             profile.local = local
             profile.direccion = direccion
+
             if imagen_user:
+                
+                image_data = base64.b64decode(imagen_user)
+                image = Image.open(ContentFile(image_data))
                 profile.imagen_user.save(f'{id}.png', ContentFile(base64.b64decode(imagen_user)), save=True)
+                
+            image_data = profile.imagen_user.read()
+            base64_image = base64.b64encode(image_data).decode('utf-8')
             profile.save()
 
             user_json = {
@@ -145,8 +173,9 @@ def user_user_update_rest(request, format=None):
                 'nemergencia': profile.nemergencia,
                 'local': profile.local,
                 'direccion': profile.direccion,
-                
+                'imagen_user' : base64_image,
             }
+
             return Response({'Msj': "Datos Actualizados", 'List': user_json})
         except User.DoesNotExist:
             return Response({'Msj': "Error no hay coincidencias"})
@@ -154,7 +183,7 @@ def user_user_update_rest(request, format=None):
             return Response({'Msj': "Valor no soportado"})
     else:
         return Response({'Msj': "Método no soportado"})
-    
+
 
 
 @api_view(['POST'])
@@ -201,3 +230,46 @@ def password_reset_confirm(request):
             return Response({'detalle': 'codigo no valido.'}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def user_admin_add_rest(request, format=None):
+    if request.method == 'POST':
+        if User.objects.filter(is_staff=True, is_superuser=True).count() >= 5:
+            return Response({'Se ha alcanzado el número máximo de administradores'}, status=status.HTTP_400_BAD_REQUEST)
+        username = request.data.get('username')
+        first_name = request.data.get('first_name')
+        last_name = request.data.get('last_name')
+        email = request.data.get('email')
+        password = request.data.get('password')
+        confirm_password = request.data.get('confirm_password')
+        imagen_base64 = request.data.get('imagen_user')
+
+        if password != confirm_password: 
+            return Response({'las contraseñas deben ser iguales'}, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.create(
+            username = username, 
+            first_name = first_name , 
+            last_name = last_name ,
+            email = email, 
+            password = password,
+            is_staff = True,
+            is_superuser = True,
+        )
+        user.set_password(password)
+        user.save()
+        profile = Profile.objects.create(
+            user=user,
+        )
+        if imagen_base64:
+            # Decodificar la imagen base64 y guardarla en el modelo de base de datos
+            format, imgstr = imagen_base64.split(';base64,')
+            ext = format.split('/')[-1]
+            image_data = ContentFile(base64.b64decode(imgstr), name=f'{user.id}.{ext}')
+            profile.imagen_user.save(f'{user.id}.{ext}', image_data, save=True)
+        
+        return Response({'Usuario creado exitosamente'}, status=status.HTTP_201_CREATED)
+
+    return Response({ 'Error en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
+
+
