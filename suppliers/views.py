@@ -77,7 +77,7 @@ def suppliers_suppliers_update_rest(request, format=None):
                 supplier.imagen_insumo.save(f'{id}.png', ContentFile(image_data), save=True)
             else:
                 # Si no se proporciona una imagen, establecer imagen_data como None y cargar la imagen predeterminada
-                image_path = os.path.join(settings.MEDIA_ROOT, 'insumo/default.jpg')
+                image_path = os.path.join(settings.MEDIA_ROOT, 'suppliers/default.jpg')
                 with open(image_path, 'rb') as f:
                     image_data = f.read()
 

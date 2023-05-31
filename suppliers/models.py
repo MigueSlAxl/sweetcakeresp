@@ -9,7 +9,7 @@ class Supplier(models.Model):
     rut=models.CharField(max_length=150,blank=False,null=False)
     nombre_proveedor=models.CharField(max_length=150,blank=False,null=False)
     tipo_insumo=models.CharField(max_length=150,blank=False,null=False)
-    imagen_insumo=models.ImageField(upload_to='insumo/',blank=False,null=True)
+    imagen_insumo=models.ImageField(upload_to='suppliers/',blank=False,null=True)
     correo_proveedor=models.EmailField(max_length=150,blank=False,null=False)
     telefono_proveedor=models.CharField(max_length=12,blank=False,null=False)
     def imagen_base64(self):
@@ -22,7 +22,7 @@ class Supplier(models.Model):
     def save(self, *args, **kwargs):
         if not self.imagen_insumo:
             # asigna la imagen por defecto si no se ha proporcionado una imagen
-            img_path = os.path.join(settings.MEDIA_ROOT, 'insumo/default.jpg')
+            img_path = os.path.join(settings.MEDIA_ROOT, 'suppliers/default.jpg')
             with open(img_path, 'rb') as f:
                 self.imagen_insumo.save('default.jpg', File(f), save=False)
         super(Supplier, self).save(*args, **kwargs)

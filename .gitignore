@@ -8,7 +8,6 @@ ordendecompra/migrations/
 datawholecake/__pycache__/
 ventas/__pycache__/
 ventas/migrations/
-media/
 datawholecake/__pycache__/
 datawholecake/settings.py
 productos/__pycache__/
