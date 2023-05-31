@@ -32,7 +32,7 @@ class CustomAuthToken(ObtainAuthToken):
         token, created = Token.objects.get_or_create(user=user)
         image_data = user.profile.imagen_user.read()
         base64_image = base64.b64encode(image_data).decode('utf-8')
-        return Response({'token': token.key,'username':user.username,'tipo':user.profile.tipo,'correo':user.username,'imagen':base64_image})
+        return Response({'token': token.key,'username':user.username,'tipo':user.profile.tipo,'correo':user.correo,'imagen':base64_image})
 
 
 @api_view(['GET'])

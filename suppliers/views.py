@@ -48,7 +48,7 @@ def suppliers_suppliers_list_rest(request, format=None):
         return JsonResponse({'ListSup': serializer.data}, safe=False)
     else:
         return Response({'Msj':"Error método no soportado"})
-    
+
 @api_view(['POST'])
 def suppliers_suppliers_update_rest(request, format=None):
     if request.method == 'POST':
@@ -118,3 +118,4 @@ def suppliers_suppliers_delete_rest(request, format=None):
             return Response({'Dato inválido'})
     else: 
         return Response({"Error método no soportado"})
+    

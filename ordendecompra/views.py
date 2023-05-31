@@ -89,7 +89,7 @@ def ordendc_ordendc_list_supplies_rest(request, format=None):
         return Response({'ListOdc':ordendc_json})
     else:
         return Response({'Msj':"Error método no soportado"})
-    
+
 @api_view(['POST'])
 def ordendc_ordendc_update_status_rest(request, format=None):
     if request.method =='POST':

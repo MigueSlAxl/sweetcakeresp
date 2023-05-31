@@ -22,7 +22,21 @@ class Supplies(models.Model):
     numero_lote= models.CharField(max_length=40 , blank = True , null= True)
     marca_producto = models.CharField (max_length=40 , blank = True , null= True)
     cantidad = models.IntegerField ( blank = False , null= False)
-    imagen_supplies = models.ImageField (upload_to="supplies/",null=True, blank=True)
+    imagen_supplies = models.ImageField (upload_to="insumo/",null=True, blank=True)
+    def imagen_base64(self):
+        if self.imagen_supplies and hasattr(self.imagen_supplies, 'url'):
+            with self.imagen_supplies.open(mode='rb') as f:
+                img_data = f.read()
+            return base64.b64encode(img_data).decode('utf-8')
+        else:
+            return None
+    def save(self, *args, **kwargs):
+        if not self.imagen_supplies:
+            # asigna la imagen por defecto si no se ha proporcionado una imagen
+            img_path = os.path.join(settings.MEDIA_ROOT, 'insumo/default.jpg')
+            with open(img_path, 'rb') as f:
+                self.imagen_supplies.save('default.jpg', File(f), save=False)
+        super(Supplies, self).save(*args, **kwargs)    
     class Meta : 
         ordering = ['id']
     def __str__(self) : 

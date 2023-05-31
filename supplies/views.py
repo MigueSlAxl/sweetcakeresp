@@ -11,7 +11,7 @@ from django.core.files.base import ContentFile
 from drf_extra_fields.fields import Base64ImageField
 import base64
 from django.conf import settings
-
+from ordendecompra.models import OrdenDC
 
 # Create your views here.
 @api_view(['POST']) 
@@ -109,9 +109,25 @@ def supplies_list_rest_estadoprogreso(request, format=None):
 @api_view(['GET'])
 def supplies_list_rest(request, format=None):
     if request.method == 'GET' : 
-        supplies_list = Supplies.objects.all()
-        serializers = SuppliesSerializer (supplies_list, many = True)
-        return JsonResponse({'List' : serializers.data} , safe=False)
+        supplies = Supplies.objects.all()
+        supplies_list = []
+        for supply in supplies: 
+            image_data = supply.imagen_supplies.read()
+            base64_image = base64.b64encode(image_data).decode('utf-8')
+            supplies_list.append({'id': supply.id, 
+                                'nombre_insumo': supply.nombre_insumo ,
+                                'fecha_llegada' : supply.fecha_llegada,
+                                'fecha_vencimiento' : supply.fecha_vencimiento,
+                                'proveedor' : supply.proveedor ,
+                                'tipo_insumo':supply.tipo_insumo, 
+                                'estado' : supply.estado , 
+                                'preciounidad' : supply.preciounidad , 
+                                'numero_lote' : supply.numero_lote,
+                                'marca_producto' : supply.marca_producto , 
+                                'cantidad' : supply.cantidad,
+                                'imagen_supplies' : base64_image,
+                                })
+        return Response({'List': supplies_list})
     else:
         return Response({'Msj':"Error método no soportado"})
 
@@ -129,6 +145,8 @@ def supplies_delete_rest(request, format=None):
         supplies = Supplies.objects.get(pk=id)
     except Supplies.DoesNotExist:
         return Response({'error': 'No existe el insumo'}, status=status.HTTP_404_NOT_FOUND)
-
+    ordendc = supplies.ordendc
+    if ordendc:
+        ordendc.delete()
     supplies.delete()
     return Response({'detail': 'Insumo eliminado con éxito'})
