@@ -61,7 +61,8 @@ def user_user_list_rest(request, format=None):
                                 'ntelefono' : profile.ntelefono,
                                 'nemergencia' : profile.nemergencia , 
                                 'local' : profile.local,
-                                'imagen_user' : base64_image
+                                'imagen_user' : base64_image,
+                                'tipo':profile.tipo
                                 })
         return Response({'List': profile_list})
     else:
@@ -141,7 +142,8 @@ def user_user_update_rest(request, format=None):
                 'ntelefono': profile.ntelefono,
                 'nemergencia': profile.nemergencia,
                 'local': profile.local,
-                'direccion': profile.direccion
+                'direccion': profile.direccion,
+                
             }
             return Response({'Msj': "Datos Actualizados", 'List': user_json})
         except User.DoesNotExist:
