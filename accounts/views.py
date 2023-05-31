@@ -30,7 +30,9 @@ class CustomAuthToken(ObtainAuthToken):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key,'username':user.username,'tipo':user.profile.tipo,'correo':user.username})
+        image_data = user.profile.imagen_user.read()
+        base64_image = base64.b64encode(image_data).decode('utf-8')
+        return Response({'token': token.key,'username':user.username,'tipo':user.profile.tipo,'correo':user.username,'imagen':base64_image})
     
 # @api_view(['GET'])
 # # Requiere autenticación mediante token
