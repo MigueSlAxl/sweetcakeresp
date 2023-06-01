@@ -242,11 +242,13 @@ def user_admin_add_rest(request, format=None):
         last_name = request.data.get('last_name')
         email = request.data.get('email')
         password = request.data.get('password')
-        # confirm_password = request.data.get('confirm_password')
+        rut = request.data.get('rut')
+        ntelefono = request.data.get('ntelefono')
+        nemergencia = request.data.get('nemergencia')
+        local = request.data.get('local')
+        direccion = request.data.get('direccion')
         imagen_base64 = request.data.get('imagen_user')
         
-        # if password != confirm_password: 
-        #     return Response({'las contraseñas deben ser iguales'}, status=status.HTTP_400_BAD_REQUEST)
         user = User.objects.create(
             username = username, 
             first_name = first_name , 
@@ -258,9 +260,15 @@ def user_admin_add_rest(request, format=None):
         )
         user.set_password(password)
         user.save()
+        
         profile = Profile.objects.create(
             user=user,
-            tipo ="Admin"
+            tipo ="Admin",
+            rut = rut,
+            ntelefono = ntelefono, 
+            nemergencia = nemergencia, 
+            local = local, 
+            direccion = direccion,
         )
         if imagen_base64:
             # Decodificar la imagen base64 y guardarla en el modelo de base de datos
