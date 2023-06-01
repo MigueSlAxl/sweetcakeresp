@@ -242,11 +242,11 @@ def user_admin_add_rest(request, format=None):
         last_name = request.data.get('last_name')
         email = request.data.get('email')
         password = request.data.get('password')
-        confirm_password = request.data.get('confirm_password')
+        # confirm_password = request.data.get('confirm_password')
         imagen_base64 = request.data.get('imagen_user')
         
-        if password != confirm_password: 
-            return Response({'las contraseñas deben ser iguales'}, status=status.HTTP_400_BAD_REQUEST)
+        # if password != confirm_password: 
+        #     return Response({'las contraseñas deben ser iguales'}, status=status.HTTP_400_BAD_REQUEST)
         user = User.objects.create(
             username = username, 
             first_name = first_name , 
