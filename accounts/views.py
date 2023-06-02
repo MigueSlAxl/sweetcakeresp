@@ -13,7 +13,6 @@ from PIL import Image
 from django.core.files.base import ContentFile
 import base64
 import os
-
 from accounts.serializers import PasswordResetConfirmSerializer, PasswordResetSerializer
 from .models import Profile
 from django.contrib.auth.tokens import default_token_generator
@@ -21,8 +20,11 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django.views import View
 from rest_framework import status
-
-
+from django.contrib.auth import login
+from django.contrib.sessions.backends.db import SessionStore
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.hashers import make_password
+import re
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
@@ -54,7 +56,7 @@ def user_user_list_rest(request, format=None):
                                 'nemergencia' : profile.nemergencia , 
                                 'local' : profile.local,
                                 'imagen_user' : base64_image,
-                                
+                                'password' : profile.user.password
                                 })
         return Response({'List': profile_list})
     else:
@@ -65,11 +67,11 @@ def user_user_list_rest(request, format=None):
 @api_view(['POST'])
 def user_user_add_rest(request, format=None):
     if request.method == 'POST':
-        username = request.data.get('username')
         first_name = request.data.get('first_name')
+        first_name_pass=first_name [0].lower()
         last_name = request.data.get('last_name')
+        last_name_pass = last_name[0].lower()
         email = request.data.get('email')
-        password = request.data.get('password')
         tipo = request.data.get('tipo')
         rut = request.data.get('rut')
         ntelefono = request.data.get('ntelefono')
@@ -77,14 +79,19 @@ def user_user_add_rest(request, format=None):
         local = request.data.get('local')
         direccion = request.data.get('direccion')
         imagen_base64 = request.data.get('imagen_user')
+        rut_5= re.search (r'\d{5}' , rut).group()
+        username = f'{first_name.capitalize()} {last_name.capitalize()}'
+        ##### LA CONTRASEÑA SIEMPRE SERA LOS PRIMEROS 5 DIGITOS DEL RUT MAS LA PRIMERA LETRA DEL NOMBRE Y APELLIDO EN MINISCULAS.
+        #print(f'{rut_5}{first_name_pass}{last_name_pass}')
+        default_password = f'{rut_5}{first_name_pass}{last_name_pass}'
+        
         user = User.objects.create(
-            username = username, 
+            username=username.strip(), 
             first_name = first_name , 
             last_name = last_name ,
             email = email, 
-            password = password,
+            password =make_password(default_password),
         )
-        user.set_password(password)
         user.save()
         
         profile = Profile.objects.create(
@@ -130,7 +137,8 @@ def user_user_update_rest(request, format=None):
     if request.method == 'POST':
         try:
             id = request.data['id']
-            username = request.data['username']
+            first_name = request.data['first_name']
+            last_name = request.data['last_name']
             tipo = request.data['tipo']
             rut = request.data['rut']
             ntelefono = request.data['ntelefono']
@@ -139,10 +147,12 @@ def user_user_update_rest(request, format=None):
             direccion = request.data['direccion']
             email = request.data['email']
             imagen_user = request.data.get('imagen_user')
-            
+            username = f'{first_name.capitalize()} {last_name.capitalize()}'
             user = User.objects.get(pk=id)
-            user.username = username
+            user.username = username.strip()
             user.email = email
+            user.first_name= first_name
+            user.last_name = last_name
             user.save()
 
             profile = user.profile
@@ -166,6 +176,8 @@ def user_user_update_rest(request, format=None):
             user_json = {
                 'id': user.id,
                 'username': user.username,
+                'first_name' : user.first_name, 
+                'last_name' : user.last_name,
                 'email': user.email,
                 'tipo': profile.tipo,
                 'rut': profile.rut,
@@ -237,7 +249,6 @@ def user_admin_add_rest(request, format=None):
     if request.method == 'POST':
         if User.objects.filter(is_staff=True, is_superuser=True).count() >= 5:
             return Response({'Se ha alcanzado el número máximo de administradores'}, status=status.HTTP_400_BAD_REQUEST)
-        username = request.data.get('username')
         first_name = request.data.get('first_name')
         last_name = request.data.get('last_name')
         email = request.data.get('email')
@@ -248,9 +259,9 @@ def user_admin_add_rest(request, format=None):
         local = request.data.get('local')
         direccion = request.data.get('direccion')
         imagen_base64 = request.data.get('imagen_user')
-        
+        username = f'{first_name.capitalize()} {last_name.capitalize()}'
         user = User.objects.create(
-            username = username, 
+            username = username.strip(), 
             first_name = first_name , 
             last_name = last_name ,
             email = email, 
@@ -269,6 +280,7 @@ def user_admin_add_rest(request, format=None):
             nemergencia = nemergencia, 
             local = local, 
             direccion = direccion,
+
         )
         if imagen_base64:
             # Decodificar la imagen base64 y guardarla en el modelo de base de datos
@@ -286,3 +298,17 @@ def user_admin_add_rest(request, format=None):
     return Response({ 'Error en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@csrf_exempt
+def logininfinito_rest(request):
+    if request.method == 'POST':
+        recuerdame = request.POST.get('recuerdame')
+        session_key = request.session.session_key
+        if recuerdame == 'true':
+            
+            request.session.set_expiry(None)
+
+        SessionStore(session_key=session_key).save()
+
+        return JsonResponse({'Msj': 'Recuerda la sesion habilitada'})
+
+    return JsonResponse({'Msj': 'Error en la solicitud'}, status=400)
