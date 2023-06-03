@@ -14,47 +14,39 @@ from django.core.files.base import ContentFile
 
 @api_view(['POST'])
 def ordentrabajo_ordentrabajo_add_rest(request):
-    datos = request.data
-    if isinstance(datos, str):
-        datos = json.loads(datos)
-
-    datos_productos = datos['datos_productos']
-    productos_creados = []
-
-    for datos_producto in datos_productos:
-        nombre_producto = datos_producto['nombre_producto']
-        precio_producto = datos_producto['precio_producto']
-        estado_producto = datos_producto['estado_producto']
-        cantidad_producto = datos_producto['cantidad_producto']
-        categoria=datos_producto['categoria']
-        imagen=datos_producto['imagen']
-        admin_id = datos_producto['admin']
-        producto = Productos.objects.create(
-            nombre=nombre_producto,
-            precio=precio_producto,
-            estado=estado_producto,
-            cantidad=cantidad_producto,
-            categoria_id=categoria
-        )
-        orden_trabajo = OrdenTrabajo.objects.create(producto=producto,
-                                                admin_id=admin_id)
-        if imagen:
-            # Decodificar la imagen base64 y guardarla en el modelo de base de datos
-            format, imgstr = imagen.split(';base64,')
-            ext = format.split('/')[-1]
-            image_data = ContentFile(base64.b64decode(imgstr), name=f'{producto.id}.{ext}')
-            producto.imagen.save(f'{producto.id}.{ext}', image_data, save=True)
-            
-        productos_creados.append({
-            'id': producto.id,
-            'nombre_producto': producto.nombre,
-            'precio_producto': producto.precio,
-            'estado_producto': producto.estado,
-            'cantidad_producto': producto.cantidad,
-            'categoria':producto.categoria.id,
-            'admin':orden_trabajo.admin.id,
-            
-        })
+    nombre_producto = request.data['nombre_producto']
+    precio_producto = request.data['precio_producto']
+    estado_producto = request.data['estado_producto']
+    cantidad_producto = request.data['cantidad_producto']
+    categoria=request.data['categoria']
+    imagen=request.data['imagen']
+    admin_id = request.data['admin']
+    producto = Productos.objects.create(
+        nombre=nombre_producto,
+        precio=precio_producto,
+        estado=estado_producto,
+        cantidad=cantidad_producto,
+        categoria_id=categoria
+    )
+    orden_trabajo = OrdenTrabajo.objects.create(producto=producto,
+                                            admin_id=admin_id)
+    if imagen:
+        # Decodificar la imagen base64 y guardarla en el modelo de base de datos
+        format, imgstr = imagen.split(';base64,')
+        ext = format.split('/')[-1]
+        image_data = ContentFile(base64.b64decode(imgstr), name=f'{producto.id}.{ext}')
+        producto.imagen.save(f'{producto.id}.{ext}', image_data, save=True)
+    productos_creados=[]        
+    productos_creados.append({
+        'id': producto.id,
+        'nombre_producto': producto.nombre,
+        'precio_producto': producto.precio,
+        'estado_producto': producto.estado,
+        'cantidad_producto': producto.cantidad,
+        'categoria':producto.categoria.id,
+        'admin':orden_trabajo.admin.id,
+        
+    })
     return Response({'mensaje': 'Órdenes de trabajo creadas correctamente.', 'productos_creados': productos_creados})
 
 
@@ -73,11 +65,24 @@ def ordentrabajo_list_rest(request):
                 'cantidad_utilizada': insumo_orden.cantidad_utilizada
             }
             insumos_data.append(insumo_data)
+        
+        ordenes_trabajo = OrdenTrabajo.objects.filter(producto=producto)
+        ordenes_trabajo_data = []
+        for orden_trabajo in ordenes_trabajo:
+            orden_trabajo_data = {
+                'id': orden_trabajo.id,
+                'admin': orden_trabajo.admin.id,
+                'trabajador': orden_trabajo.trabajador_id,
+                'insumos_utilizados': insumos_data
+            }
+            ordenes_trabajo_data.append(orden_trabajo_data)
+
         imagen_base64 = ''
         if producto.imagen:
             with open(producto.imagen.path, 'rb') as img_file:
                 imagen_data = img_file.read()
                 imagen_base64 = base64.b64encode(imagen_data).decode('utf-8')
+        
         producto_data = {
             'id': producto.id,
             'nombre_producto': producto.nombre,
@@ -87,13 +92,14 @@ def ordentrabajo_list_rest(request):
             'lote': producto.lote,
             'fecha_elaboracion': producto.fecha_elaboracion,
             'fecha_vencimiento': producto.fecha_vencimiento,
-            'categoria':producto.categoria_id,
-            'imagen':imagen_base64,
-            'insumos_utilizados': insumos_data
+            'categoria': producto.categoria_id,
+            'imagen': imagen_base64,
+            'ordenes_trabajo': ordenes_trabajo_data
         }
         productos_data.append(producto_data)
 
-    return Response({"ListTrabajos":productos_data})
+    return Response({"ListTrabajos": productos_data})
+
 
 @api_view(['POST'])
 def ordentrabajo_edit_rest(request):
