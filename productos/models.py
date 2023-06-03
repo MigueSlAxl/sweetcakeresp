@@ -18,9 +18,9 @@ class Categoria(models.Model):
 
 class Productos(models.Model):
     nombre=models.CharField(max_length=150,blank=False,null=False)
-    precio=models.IntegerField(blank=False,null=False)
-    fecha_elaboracion=models.DateField(auto_now=False,auto_now_add=False)
-    fecha_vencimiento=models.DateField(auto_now=False,auto_now_add=False)
+    precio=models.IntegerField(blank=False,null=True)
+    fecha_elaboracion=models.DateField(auto_now=False,auto_now_add=False,null=True)
+    fecha_vencimiento=models.DateField(auto_now=False,auto_now_add=False,null=True)
     categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True)
     imagen=models.ImageField(upload_to='productos/',blank=False,null=True)
     estado=models.CharField(max_length=150,blank=True,null=True,default=True)

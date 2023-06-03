@@ -23,6 +23,7 @@ from suppliers.urls import suppliers_urlpatterns
 from ordendecompra.urls import ordendc_urlpatterns
 from ventas.urls import ventas_urlpatterns
 from supplies.urls import supplies_urlpatterns
+from ordendetrabajo.urls import ordendetrabajo_urlpatterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,7 +32,8 @@ urlpatterns = [
     path('suppliers/',include(suppliers_urlpatterns)),
     path('ordendc/',include(ordendc_urlpatterns)),
     path('supplies/',include(supplies_urlpatterns)),
-    path('ventas/',include(ventas_urlpatterns))
+    path('ventas/',include(ventas_urlpatterns)),
+    path('ordentrabajo/',include(ordendetrabajo_urlpatterns))
 ]
 admin.site.site_header = 'Wholecake'
 admin.site.site_title = 'Wholecake'    

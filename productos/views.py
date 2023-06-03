@@ -1,10 +1,8 @@
-import datetime
-from io import BytesIO
-from django.shortcuts import render
-from rest_framework import generics, viewsets, serializers,status
+from rest_framework import serializers,status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import (api_view, authentication_classes, permission_classes)
+from rest_framework.permissions import IsAuthenticated
 from drf_extra_fields.fields import Base64ImageField
 from django.http import JsonResponse
 import base64
@@ -21,6 +19,7 @@ class ProductoSerializadorImagenJson(serializers.ModelSerializer):
         fields=['id','nombre','precio','fecha_elaboracion','fecha_vencimiento','categoria','imagen','estado','cantidad']
 
 @api_view(['POST'])
+# @permission_classes([IsAuthenticated])
 def productos_productos_add_rest(request, format=None):
     if request.method == 'POST':
         serializer = ProductoSerializadorImagenJson(data=request.data)

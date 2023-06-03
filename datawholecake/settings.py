@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'suppliers',
     'ordendecompra',
     'supplies',
-    'ventas'
+    'ventas',
+    'ordendetrabajo'
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
