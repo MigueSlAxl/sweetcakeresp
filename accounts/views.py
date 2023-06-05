@@ -43,7 +43,7 @@ class CustomAuthToken(ObtainAuthToken):
                     return Response({'token': token.key, 'email': user.email,  'username' : user.username ,
                                     'tipo':user.profile.tipo ,'imagen_user': base64_image, 
                                     'direccion' : user.profile.direccion ,
-                                    'local' : user.profile.local , 'ntelefono' : user.profile.telefono })
+                                    'local' : user.profile.local , 'ntelefono' : user.profile.ntelefono})
                 else:
                     return Response({'Msj': 'Contraseña incorrecta'})
             except User.DoesNotExist:
