@@ -7,7 +7,7 @@ import os
 from django.core.files import File
 import base64
 from django.conf import settings
-
+from ordendetrabajo.models import Trabajador
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -39,6 +39,13 @@ class Profile(models.Model):
         
     class Meta:
         ordering = ['user__username']
+        
+    
 
 
 
+def create_trabajador(sender , instance , created, **kwargs):
+    if created and instance.tipo == 'Pastelero':
+        user = instance.user
+        Trabajador.objects.create(user=user)
+post_save.connect(create_trabajador , sender=Profile)

@@ -25,16 +25,28 @@ from django.contrib.sessions.backends.db import SessionStore
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
 import re
+from django.core.exceptions import ValidationError
+from django.contrib.auth import authenticate
+
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data,
-                                            context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
-        image_data = user.profile.imagen_user.read()
-        base64_image = base64.b64encode(image_data).decode('utf-8')
-        return Response({'token': token.key,'username':user.username,'tipo':user.profile.tipo,'email':user.email,'imagen':base64_image})
+        email = request.data.get('email')
+        password = request.data.get('password')
+        if email and password:
+            try:
+                user = User.objects.get(email=email)
+                auth_user = authenticate(username=user.username, password=password)
+                if auth_user is not None:
+                    token, created = Token.objects.get_or_create(user=user)
+                    imagen_user = user.profile.imagen_user.read()
+                    base64_image = base64.b64encode(imagen_user).decode('utf-8')
+                    return Response({'token': token.key, 'email': user.email,  'username' : user.username , 'tipo':user.profile.tipo ,'imagen_user': base64_image })
+                else:
+                    return Response({'Msj': 'Contraseña incorrecta'})
+            except User.DoesNotExist:
+                return Response({'Msj': 'Correo equivocado'})
+        else:
+            return Response({'Msj': 'Se requiere el email y la contraseña'})
 
 
 @api_view(['GET'])
@@ -56,7 +68,6 @@ def user_user_list_rest(request, format=None):
                                 'nemergencia' : profile.nemergencia , 
                                 'local' : profile.local,
                                 'imagen_user' : base64_image,
-                                'password' : profile.user.password
                                 })
         return Response({'List': profile_list})
     else:
@@ -68,17 +79,27 @@ def user_user_list_rest(request, format=None):
 def user_user_add_rest(request, format=None):
     if request.method == 'POST':
         first_name = request.data.get('first_name')
+        if re.search(r'\d', first_name):
+            return Response({'Msj': 'Error, el nombre debe contener letras, no números'})
         first_name_pass=first_name [0].lower()
         last_name = request.data.get('last_name')
+        if re.search(r'\d', last_name):
+            return Response({'Msj': 'Error, el apellido debe contener letras, no números'})
         last_name_pass = last_name[0].lower()
         email = request.data.get('email')
+        if User.objects.filter(email=email).exists():
+            return Response({'Msj': 'Error, el Correo ya existe'})
         tipo = request.data.get('tipo')
         rut = request.data.get('rut')
+        if len(rut) > 12:
+            return Response ({'Msj': 'Error, RUT  no debe superar los 12 caracteres'})
         ntelefono = request.data.get('ntelefono')
         nemergencia = request.data.get('nemergencia')
         local = request.data.get('local')
         direccion = request.data.get('direccion')
-        imagen_base64 = request.data.get('imagen_user')
+        imagen_user = request.data.get('imagen_user')
+        if tipo == '' or ntelefono == '' or nemergencia == '' or local == '' or direccion == '' or first_name == '' or last_name == '':
+            return Response({'ERROR': 'Cargo , Numero Telefono , Numero emergencia, Dirección, Nombre y Apellido son campos obligatorios, porfavor rellenelos'})
         rut_5= re.search (r'\d{5}' , rut).group()
         username = f'{first_name.capitalize()} {last_name.capitalize()}'
         ##### LA CONTRASEÑA SIEMPRE SERA LOS PRIMEROS 5 DIGITOS DEL RUT MAS LA PRIMERA LETRA DEL NOMBRE Y APELLIDO EN MINISCULAS.
@@ -103,9 +124,9 @@ def user_user_add_rest(request, format=None):
             local=local,
             direccion=direccion,
         )
-        if imagen_base64:
+        if imagen_user:
             # Decodificar la imagen base64 y guardarla en el modelo de base de datos
-            format, imgstr = imagen_base64.split(';base64,')
+            format, imgstr = imagen_user.split(';base64,')
             ext = format.split('/')[-1]
             image_data = ContentFile(base64.b64decode(imgstr), name=f'{user.id}.{ext}')
             profile.imagen_user.save(f'{user.id}.{ext}', image_data, save=True)
@@ -133,20 +154,31 @@ def user_user_delete_rest(request, format=None):
 
 
 @api_view(['POST'])
-def user_user_update_rest(request, format=None):
+def user_user_update_rest(request, format=None , ):
     if request.method == 'POST':
         try:
             id = request.data['id']
+            user=get_object_or_404(User,  pk = id)
             first_name = request.data['first_name']
+            if re.search(r'\d', first_name):
+                return Response({'Msj': 'Error, el nombre debe contener letras, no números'})
             last_name = request.data['last_name']
+            if re.search(r'\d', last_name):
+                return Response({'Msj': 'Error, el nombre debe contener letras, no números'})
             tipo = request.data['tipo']
             rut = request.data['rut']
+            if len(rut) > 12:
+                return Response ({'Msj': 'Error, RUT  no debe superar los 12 caracteres'})
             ntelefono = request.data['ntelefono']
             nemergencia = request.data['nemergencia']
             local = request.data['local']
             direccion = request.data['direccion']
             email = request.data['email']
+            if User.objects.filter(email=email).exclude(id=user.id).exists():
+                return Response({'Msj': 'Error, el Correo ya existe'})
             imagen_user = request.data.get('imagen_user')
+            if tipo == '' or ntelefono == '' or nemergencia == '' or local == '' or direccion == '' or first_name == '' or last_name == '':
+                return Response({'ERROR': 'Cargo , Numero Telefono , Numero emergencia, Dirección, Nombre y Apellido son campos obligatorios, porfavor rellenelos'})
             username = f'{first_name.capitalize()} {last_name.capitalize()}'
             user = User.objects.get(pk=id)
             user.username = username.strip()
@@ -250,65 +282,68 @@ def user_admin_add_rest(request, format=None):
         if User.objects.filter(is_staff=True, is_superuser=True).count() >= 5:
             return Response({'Se ha alcanzado el número máximo de administradores'}, status=status.HTTP_400_BAD_REQUEST)
         first_name = request.data.get('first_name')
+        if re.search(r'\d', first_name):
+            return Response({'Msj': 'Error, el nombre debe contener letras, no números'})
         last_name = request.data.get('last_name')
+        if re.search(r'\d', last_name):
+            return Response({'Msj': 'Error, el nombre debe contener letras, no números'})
         email = request.data.get('email')
+        if User.objects.filter(email=email).exists():
+                return Response({'Msj': 'Error, el Correo ya existe'})
         password = request.data.get('password')
         rut = request.data.get('rut')
+        if len(rut) > 12:
+                return Response ({'Msj': 'Error, RUT  no debe superar los 12 caracteres'})
         ntelefono = request.data.get('ntelefono')
         nemergencia = request.data.get('nemergencia')
         local = request.data.get('local')
         direccion = request.data.get('direccion')
-        imagen_base64 = request.data.get('imagen_user')
+        imagen_user = request.FILES.get('imagen_user')
+        if ntelefono == '' or nemergencia == '' or local == '' or direccion == '' or first_name == '' or last_name == '':
+            return Response({'ERROR': 'Cargo , Numero Telefono , Numero emergencia, Dirección, Nombre y Apellido son campos obligatorios, porfavor rellenelos'})
         username = f'{first_name.capitalize()} {last_name.capitalize()}'
         user = User.objects.create(
-            username = username.strip(), 
-            first_name = first_name , 
-            last_name = last_name ,
-            email = email, 
-            password = password,
-            is_staff = True,
-            is_superuser = True,
+            username=username.strip(),
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=password,
+            is_staff=True,
+            is_superuser=True,
         )
         user.set_password(password)
         user.save()
-        
+
         profile = Profile.objects.create(
             user=user,
-            tipo ="Admin",
-            rut = rut,
-            ntelefono = ntelefono, 
-            nemergencia = nemergencia, 
-            local = local, 
-            direccion = direccion,
-
+            tipo="Admin",
+            rut=rut,
+            ntelefono=ntelefono,
+            nemergencia=nemergencia,
+            local=local,
+            direccion=direccion,
         )
-        if imagen_base64:
-            # Decodificar la imagen base64 y guardarla en el modelo de base de datos
-            format, imgstr = imagen_base64.split(';base64,')
-            ext = format.split('/')[-1]
-            image_data = ContentFile(base64.b64decode(imgstr), name=f'{user.id}.{ext}')
-            profile.imagen_user.save(f'{user.id}.{ext}', image_data, save=True)
+
+        if imagen_user:
+            # Leer los datos de la imagen y codificarlos en base64
+            image_data = imagen_user.read()
+            encoded_image = base64.b64encode(image_data).decode('utf-8')
+            
+            # Guardar la imagen en el modelo de base de datos
+            format, ext = imagen_user.name.split(';base64,')
+            profile.imagen_user.save(f'{user.id}.{ext}', ContentFile(image_data), save=True)
+
             token, created = Token.objects.get_or_create(user=user)
-            image_data = user.profile.imagen_user.read()
-            base64_image = base64.b64encode(image_data).decode('utf-8')
-            return Response({'token': token.key,'username':user.username,'tipo':user.profile.tipo,'correo':user.username,'imagen':base64_image})
-        
+            return Response({
+                'token': token.key,
+                'username': user.username,
+                'tipo': user.profile.tipo,
+                'correo': user.username,
+                'imagen_user': encoded_image, 
+            })
+
         return Response({'Usuario creado exitosamente'}, status=status.HTTP_201_CREATED)
 
-    return Response({ 'Error en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'Error en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@csrf_exempt
-def logininfinito_rest(request):
-    if request.method == 'POST':
-        recuerdame = request.POST.get('recuerdame')
-        session_key = request.session.session_key
-        if recuerdame == 'true':
-            
-            request.session.set_expiry(None)
-
-        SessionStore(session_key=session_key).save()
-
-        return JsonResponse({'Msj': 'Recuerda la sesion habilitada'})
-
-    return JsonResponse({'Msj': 'Error en la solicitud'}, status=400)
