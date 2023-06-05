@@ -40,7 +40,10 @@ class CustomAuthToken(ObtainAuthToken):
                     token, created = Token.objects.get_or_create(user=user)
                     imagen_user = user.profile.imagen_user.read()
                     base64_image = base64.b64encode(imagen_user).decode('utf-8')
-                    return Response({'token': token.key, 'email': user.email,  'username' : user.username , 'tipo':user.profile.tipo ,'imagen_user': base64_image })
+                    return Response({'token': token.key, 'email': user.email,  'username' : user.username ,
+                                    'tipo':user.profile.tipo ,'imagen_user': base64_image, 
+                                    'direccion' : user.profile.direccion ,
+                                    'local' : user.profile.local , 'ntelefono' : user.profile.telefono })
                 else:
                     return Response({'Msj': 'Contraseña incorrecta'})
             except User.DoesNotExist:
