@@ -52,7 +52,7 @@ def ordentrabajo_ordentrabajo_add_rest(request):
 
 @api_view(['GET'])
 def ordentrabajo_list_rest(request):
-    productos = Productos.objects.all()
+    productos = Productos.objects.filter(estado='Elaboracion')
     productos_data = []
 
     for producto in productos:
