@@ -33,11 +33,10 @@ class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         email = request.data.get('email')
         password = request.data.get('password')
-        User =get_user_model()
         if email and password:
             try:
                 user = User.objects.get(email=email)
-                auth_user = authenticate(username=user.username, password=password)
+                auth_user = authenticate(email=user.email, password=password)
                 if auth_user is not None:
                     token, created = Token.objects.get_or_create(user=user)
                     imagen_user = user.profile.imagen_user.read()
