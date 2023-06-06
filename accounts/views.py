@@ -41,17 +41,17 @@ class CustomAuthToken(ObtainAuthToken):
                     imagen_user = user.profile.imagen_user.read()
                     base64_image = base64.b64encode(imagen_user).decode('utf-8')
                     return Response({'token': token.key, 'email': user.email,  'username' : user.username ,
-                                    'tipo':user.profile.tipo ,'imagen_user': base64_image, 
+                                    'id' : user.id,
+                                    'tipo':user.profile.tipo ,
                                     'direccion' : user.profile.direccion ,
-                                    'local' : user.profile.local , 'ntelefono' : user.profile.ntelefono})
+                                    'local' : user.profile.local , 'ntelefono' : user.profile.ntelefono,
+                                    'imagen_user': base64_image })
                 else:
                     return Response({'Msj': 'Contraseña incorrecta'})
             except User.DoesNotExist:
                 return Response({'Msj': 'Correo equivocado'})
         else:
             return Response({'Msj': 'Se requiere el email y la contraseña'})
-
-
 @api_view(['GET'])
 def user_user_list_rest(request, format=None):
     if request.method == 'GET':
@@ -348,5 +348,6 @@ def user_admin_add_rest(request, format=None):
         return Response({'Usuario creado exitosamente'}, status=status.HTTP_201_CREATED)
 
     return Response({'Error en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
