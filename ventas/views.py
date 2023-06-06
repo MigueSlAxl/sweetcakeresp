@@ -14,13 +14,14 @@ def ventas_ventas_add_rest(request):
         datos = json.loads(datos)
     venta = Venta.objects.create(total=0)  # Asignamos un valor inicial al campo total
     total_venta = 0
-    print(datos)
     productos = datos['productos']
     for item in productos:
         id = item['id']
         cantidad = item['cantidad']
         producto = Productos.objects.get(pk=id)
         producto.cantidad =producto.cantidad - cantidad
+        if producto.cantidad<=0:
+            producto.estado='Vendido'
         producto.save()
         venta_detalle = VentaDetalle.objects.create(
             venta=venta,

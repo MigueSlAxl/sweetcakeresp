@@ -19,7 +19,6 @@ class ProductoSerializadorImagenJson(serializers.ModelSerializer):
         fields=['id','nombre','precio','fecha_elaboracion','fecha_vencimiento','categoria','imagen','estado','cantidad']
 
 @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
 def productos_productos_add_rest(request, format=None):
     if request.method == 'POST':
         serializer = ProductoSerializadorImagenJson(data=request.data)
@@ -52,7 +51,7 @@ class ProductosSerializer(serializers.ModelSerializer):
 @api_view(['GET'])
 def productos_productos_list_rest(request, format=None):
     if request.method == 'GET':
-        productos_list = Productos.objects.all()
+        productos_list = Productos.objects.filter(estado='Listo')
         serializer = ProductosSerializer(productos_list, many=True)
         return JsonResponse({'List': serializer.data}, safe=False)
     else:
