@@ -18,6 +18,7 @@ from .models import Profile
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
 from django.views import View
 from rest_framework import status
 from django.contrib.auth import login
@@ -32,6 +33,7 @@ class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         email = request.data.get('email')
         password = request.data.get('password')
+        User =get_user_model()
         if email and password:
             try:
                 user = User.objects.get(email=email)
