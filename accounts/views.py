@@ -344,8 +344,8 @@ def user_admin_add_rest(request, format=None):
                 image = Image.open(ContentFile(image_data))
                 profile.imagen_user.save(f'{id}.png', ContentFile(base64.b64decode(imagen_user)), save=True)
                 
-        image_data = profile.imagen_user.read()
-        base64_image = base64.b64encode(image_data).decode('utf-8')
+                image_data = profile.imagen_user.read()
+                base64_image = base64.b64encode(image_data).decode('utf-8')
         profile.save()
         token, created = Token.objects.get_or_create(user=user)
         return Response({
