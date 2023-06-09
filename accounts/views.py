@@ -294,29 +294,45 @@ def user_admin_add_rest(request, format=None):
     if request.method == 'POST':
         if User.objects.filter(is_staff=True, is_superuser=True).count() >= 5:
             return Response({'Se ha alcanzado el número máximo de administradores'}, status=status.HTTP_400_BAD_REQUEST)
+        
         first_name = request.data.get('first_name')
         if re.search(r'\d', first_name):
             return Response({'Msj': 'Error, el nombre debe contener letras, no números'})
+        
         last_name = request.data.get('last_name')
         if re.search(r'\d', last_name):
             return Response({'Msj': 'Error, el nombre debe contener letras, no números'})
+        
         email = request.data.get('email')
         if User.objects.filter(email=email).exists():
-                return Response({'Msj': 'Error, el Correo ya existe'})
+            return Response({'Msj': 'Error, el Correo ya existe'})
+        
         password = request.data.get('password')
         rut = request.data.get('rut')
         if len(rut) > 12:
-                return Response ({'Msj': 'Error, RUT  no debe superar los 12 caracteres'})
+            return Response({'Msj': 'Error, RUT no debe superar los 12 caracteres'})
+        
         ntelefono = request.data.get('ntelefono')
         nemergencia = request.data.get('nemergencia')
         local = request.data.get('local')
         direccion = request.data.get('direccion')
         imagen_user = request.FILES.get('imagen_user')
-        if ntelefono == '' or nemergencia == '' or local == '' or direccion == '' or first_name == '' or last_name == '':
-            return Response({'ERROR': 'Cargo , Numero Telefono , Numero emergencia, Dirección, Nombre y Apellido son campos obligatorios, porfavor rellenelos'})
+        
+        if (
+            ntelefono == '' or
+            nemergencia == '' or
+            local == '' or
+            direccion == '' or
+            first_name == '' or
+            last_name == ''
+        ):
+            return Response({'ERROR': 'Cargo, Numero Telefono, Numero emergencia, Dirección, Nombre y Apellido son campos obligatorios, por favor rellénelos'})
+        
         username = f'{first_name.capitalize()} {last_name.capitalize()}'
+        
         if User.objects.filter(username=username).exists():
-                return Response({'Msj': 'Error, el Nombre ya existe , favor ingrese sus nombres completos'})
+            return Response({'Msj': 'Error, el Nombre ya existe, favor ingrese sus nombres completos'})
+        
         user = User.objects.create(
             username=username.strip(),
             first_name=first_name,
@@ -346,17 +362,16 @@ def user_admin_add_rest(request, format=None):
                 
                 image_data = profile.imagen_user.read()
                 base64_image = base64.b64encode(image_data).decode('utf-8')
+        
         profile.save()
         token, created = Token.objects.get_or_create(user=user)
         return Response({
-                'token': token.key,
-                'username': user.username,
-                'tipo': user.profile.tipo,
-                'correo': user.username,
-                'imagen_user': base64_image, 
-            })
-
-        return Response({'Usuario creado exitosamente'}, status=status.HTTP_201_CREATED)
+            'token': token.key,
+            'username': user.username,
+            'tipo': user.profile.tipo,
+            'correo': user.username,
+            'imagen_user': base64_image, 
+        })
 
     return Response({'Error en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
 
