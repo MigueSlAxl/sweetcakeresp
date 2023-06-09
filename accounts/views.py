@@ -365,13 +365,7 @@ def user_admin_add_rest(request, format=None):
         
         profile.save()
         token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            'token': token.key,
-            'username': user.username,
-            'tipo': user.profile.tipo,
-            'correo': user.username,
-            'imagen_user': base64_image, 
-        })
+        return Response({'message': 'Usuario creado exitosamente'}, status=status.HTTP_201_CREATED)
 
     return Response({'Error en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
 
