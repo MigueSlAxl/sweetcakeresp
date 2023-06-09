@@ -37,7 +37,7 @@ class CustomAuthToken(ObtainAuthToken):
         if email and password:
             try:
                 user = User.objects.get(email=email)
-                auth_user = authenticate(username=user.username, password=password)
+                auth_user = authenticate(username=user.username, password=password , email = user.email)
                 if auth_user is not None:
                     token, created = Token.objects.get_or_create(user=user)
                     imagen_user = user.profile.imagen_user.read()
@@ -54,6 +54,7 @@ class CustomAuthToken(ObtainAuthToken):
                 return Response({'Msj': 'Correo equivocado'})
         else:
             return Response({'Msj': 'Se requiere el email y la contraseña'})
+
 @api_view(['GET'])
 def user_user_list_rest(request, format=None):
     if request.method == 'GET':
@@ -107,6 +108,8 @@ def user_user_add_rest(request, format=None):
             return Response({'ERROR': 'Cargo , Numero Telefono , Numero emergencia, Dirección, Nombre y Apellido son campos obligatorios, porfavor rellenelos'})
         rut_5= re.search (r'\d{5}' , rut).group()
         username = f'{first_name.capitalize()} {last_name.capitalize()}'
+        if User.objects.filter(username=username).exists():
+                return Response({'Msj': 'Error, el Nombre ya existe , favor ingrese sus nombres completos'})
         ##### LA CONTRASEÑA SIEMPRE SERA LOS PRIMEROS 5 DIGITOS DEL RUT MAS LA PRIMERA LETRA DEL NOMBRE Y APELLIDO EN MINISCULAS.
         #print(f'{rut_5}{first_name_pass}{last_name_pass}')
         default_password = f'{rut_5}{first_name_pass}{last_name_pass}'
@@ -130,12 +133,15 @@ def user_user_add_rest(request, format=None):
             direccion=direccion,
         )
         if imagen_user:
-            # Decodificar la imagen base64 y guardarla en el modelo de base de datos
-            format, imgstr = imagen_user.split(';base64,')
-            ext = format.split('/')[-1]
-            image_data = ContentFile(base64.b64decode(imgstr), name=f'{user.id}.{ext}')
-            profile.imagen_user.save(f'{user.id}.{ext}', image_data, save=True)
-        
+                
+                image_data = base64.b64decode(imagen_user)
+                image = Image.open(ContentFile(image_data))
+                profile.imagen_user.save(f'{id}.png', ContentFile(base64.b64decode(imagen_user)), save=True)
+                
+                image_data = profile.imagen_user.read()
+                base64_image = base64.b64encode(image_data).decode('utf-8')
+        profile.save()
+                
         return Response({'message': 'Usuario creado exitosamente'}, status=status.HTTP_201_CREATED)
 
     return Response({'message': 'Error en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
@@ -185,6 +191,8 @@ def user_user_update_rest(request, format=None , ):
             if tipo == '' or ntelefono == '' or nemergencia == '' or local == '' or direccion == '' or first_name == '' or last_name == '':
                 return Response({'ERROR': 'Cargo , Numero Telefono , Numero emergencia, Dirección, Nombre y Apellido son campos obligatorios, porfavor rellenelos'})
             username = f'{first_name.capitalize()} {last_name.capitalize()}'
+            if User.objects.filter(username=username).exclude(id=user.id).exists():
+                return Response({'Msj': 'Error, el Nombre ya existe , favor ingrese sus nombres completos'})
             user = User.objects.get(pk=id)
             user.username = username.strip()
             user.email = email
@@ -307,6 +315,8 @@ def user_admin_add_rest(request, format=None):
         if ntelefono == '' or nemergencia == '' or local == '' or direccion == '' or first_name == '' or last_name == '':
             return Response({'ERROR': 'Cargo , Numero Telefono , Numero emergencia, Dirección, Nombre y Apellido son campos obligatorios, porfavor rellenelos'})
         username = f'{first_name.capitalize()} {last_name.capitalize()}'
+        if User.objects.filter(username=username).exists():
+                return Response({'Msj': 'Error, el Nombre ya existe , favor ingrese sus nombres completos'})
         user = User.objects.create(
             username=username.strip(),
             first_name=first_name,
@@ -330,21 +340,20 @@ def user_admin_add_rest(request, format=None):
         )
 
         if imagen_user:
-            # Leer los datos de la imagen y codificarlos en base64
-            image_data = imagen_user.read()
-            encoded_image = base64.b64encode(image_data).decode('utf-8')
-            
-            # Guardar la imagen en el modelo de base de datos
-            format, ext = imagen_user.name.split(';base64,')
-            profile.imagen_user.save(f'{user.id}.{ext}', ContentFile(image_data), save=True)
-
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({
+                image_data = base64.b64decode(imagen_user)
+                image = Image.open(ContentFile(image_data))
+                profile.imagen_user.save(f'{id}.png', ContentFile(base64.b64decode(imagen_user)), save=True)
+                
+        image_data = profile.imagen_user.read()
+        base64_image = base64.b64encode(image_data).decode('utf-8')
+        profile.save()
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
                 'token': token.key,
                 'username': user.username,
                 'tipo': user.profile.tipo,
                 'correo': user.username,
-                'imagen_user': encoded_image, 
+                'imagen_user': base64_image, 
             })
 
         return Response({'Usuario creado exitosamente'}, status=status.HTTP_201_CREATED)
