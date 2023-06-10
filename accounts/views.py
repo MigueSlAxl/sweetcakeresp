@@ -316,7 +316,7 @@ def user_admin_add_rest(request, format=None):
         nemergencia = request.data.get('nemergencia')
         local = request.data.get('local')
         direccion = request.data.get('direccion')
-        imagen_user = request.FILES.get('imagen_user')
+        imagen_user = request.data.get('imagen_user')
         
         if (
             ntelefono == '' or
@@ -364,8 +364,16 @@ def user_admin_add_rest(request, format=None):
                 base64_image = base64.b64encode(image_data).decode('utf-8')
         
         profile.save()
+        
         token, created = Token.objects.get_or_create(user=user)
-        return Response({'message': 'Usuario creado exitosamente'}, status=status.HTTP_201_CREATED)
+        
+        return Response({
+            'token': token.key,
+            'username': user.username,
+            'tipo': user.profile.tipo,
+            'correo': user.username,
+            'imagen_user': base64_image, 
+        })
 
     return Response({'Error en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
 
