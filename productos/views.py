@@ -1,3 +1,4 @@
+from operator import itemgetter
 from rest_framework import serializers,status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -158,12 +159,11 @@ def productos_categoria_add_rest(request, format=None):
 def productos_categoria_list_rest(request, format=None):
     if request.method == 'GET':
         categoria_list = Categoria.objects.all()
-        categoria_json = []
-        for es in categoria_list:
-            categoria_json.append({'id':es.id,'nombre':es.nombre})
-        return Response({'List':categoria_json})
+        categoria_json = [{'id': es.id, 'nombre': es.nombre} for es in categoria_list]
+        categoria_json.sort(key=itemgetter('nombre'))
+        return Response({'List': categoria_json})
     else:
-        return Response({'Msj':"Error método no soportado"})
+        return Response({'Msj': "Error método no soportado"})
     
 @api_view(['POST'])
 def productos_categoria_update_rest(request, format=None):
