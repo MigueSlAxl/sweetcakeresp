@@ -32,10 +32,9 @@ def ordentrabajo_ordentrabajo_add_rest(request):
                                             admin_id=admin_id)
     if imagen:
         # Decodificar la imagen base64 y guardarla en el modelo de base de datos
-        format, imgstr = imagen.split(';base64,')
-        ext = format.split('/')[-1]
-        image_data = ContentFile(base64.b64decode(imgstr), name=f'{producto.id}.{ext}')
-        producto.imagen.save(f'{producto.id}.{ext}', image_data, save=True)
+        # ext = format.split('/')[-1]
+        image_data = ContentFile(base64.b64decode(imagen), name=f'{producto.id}')
+        producto.imagen.save(f'{producto.id}', image_data, save=True)
     productos_creados=[]        
     productos_creados.append({
         'id': producto.id,
@@ -179,3 +178,4 @@ def ordentrabajo_edit_rest(request):
     
     except OrdenTrabajo.DoesNotExist:
         return Response({'error': 'No se encontró una Orden de Trabajo para el producto especificado.'}, status=404)
+    
