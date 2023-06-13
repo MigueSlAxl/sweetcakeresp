@@ -3,7 +3,7 @@ from rest_framework import serializers,status
 from rest_framework.decorators import (api_view, authentication_classes, permission_classes)
 from django.http import JsonResponse
 from rest_framework.response import Response
-
+from django.contrib.auth.models import User
 from productos.models import Productos
 from .models import Venta,VentaDetalle
 
@@ -13,6 +13,9 @@ def ventas_ventas_add_rest(request):
     if isinstance(datos, str):
         datos = json.loads(datos)
     venta = Venta.objects.create(total=0)  # Asignamos un valor inicial al campo total
+    user=request.data['vendedor']
+    nombre=User.objects.get(id=user)
+    venta.vendedor=(nombre.first_name+' '+nombre.last_name)
     total_venta = 0
     productos = datos['productos']
     for item in productos:
@@ -57,6 +60,7 @@ def ventas_ventas_list_rest(request):
 
         venta_info = {
             'id_venta': venta.id,
+            'vendedor':venta.vendedor,
             'fecha': venta.fecha,
             'total': total_venta,
             'productos': productos
