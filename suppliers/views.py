@@ -107,8 +107,8 @@ def suppliers_suppliers_delete_rest(request, format=None):
         try: 
             id = request.data['id']
             if isinstance(id, int):
-                suppliers_array=Supplier.objects.get(pk=id)
-                suppliers_array.delete()
+                suppliers=Supplier.objects.get(pk=id)
+                suppliers.delete()
                 return Response({'Proveedor eliminado con éxito'})
             else:
                 return Response({'Ingrese un número entero'})

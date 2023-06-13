@@ -69,3 +69,21 @@ def ventas_ventas_list_rest(request):
 
     respuesta = {'listventas': resultado}
     return Response(respuesta)
+
+@api_view(['POST'])
+def ventas_ventas_delete_rest(request, format=None):
+    if request.method =='POST':
+        try: 
+            id = request.data['id']
+            if isinstance(id, int):
+                venta=Venta.objects.get(pk=id)
+                venta.delete()
+                return Response({'Venta eliminada con éxito'})
+            else:
+                return Response({'Ingrese un número entero'})
+        except Venta.DoesNotExist:
+            return Response({'No existe la ID en la BBDD'})
+        except ValueError:
+            return Response({'Dato inválido'})
+    else: 
+        return Response({"Error método no soportado"})
