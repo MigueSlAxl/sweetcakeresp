@@ -111,7 +111,6 @@ def ordentrabajo_edit_rest(request):
     fecha_elaboracion=datos.get('fecha_elaboracion')
     fecha_vencimiento=datos.get('fecha_vencimiento')
     estado=datos.get('estado')
-    trabajador_id=datos.get('trabajador')
     imagen_base64 = datos.get('imagen')
     insumos = datos.get('insumos', [])
     
@@ -168,7 +167,7 @@ def ordentrabajo_edit_rest(request):
             'fecha_elaboracion': producto.fecha_elaboracion,
             'fecha_vencimiento': producto.fecha_vencimiento,
             'categoria': producto.categoria_id,
-            'trabajador':ordendetrabajo.trabajador_id,
+            'trabajador':ordendetrabajo.trabajador,
             'insumos_utilizados': insumos_agregados
         }
             
