@@ -111,14 +111,17 @@ def ordentrabajo_edit_rest(request):
     fecha_elaboracion=datos.get('fecha_elaboracion')
     fecha_vencimiento=datos.get('fecha_vencimiento')
     estado=datos.get('estado')
-    trabajador=datos.get('trabajador')
+    trabajador_id=datos.get('trabajador')
     imagen_base64 = datos.get('imagen')
     insumos = datos.get('insumos', [])
     
     try:
         # Obtener la Orden de Trabajo que contiene el producto
         ordendetrabajo = OrdenTrabajo.objects.get(producto_id=producto_id)
-        ordendetrabajo.trabajador_id=trabajador
+        # Obtener el objeto Trabajador basado en el ID recibido
+        trabajador = Trabajador.objects.get(user_id=trabajador_id)
+        # Asignar el objeto Trabajador al campo 'user' del objeto OrdenTrabajo
+        ordendetrabajo.trabajador.user = trabajador
         producto=Productos.objects.get(pk=producto_id)
         producto.fecha_elaboracion=fecha_elaboracion
         producto.fecha_vencimiento=fecha_vencimiento
