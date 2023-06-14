@@ -119,8 +119,8 @@ def ordentrabajo_edit_rest(request):
         # Obtener la Orden de Trabajo que contiene el producto
         ordendetrabajo = OrdenTrabajo.objects.get(producto_id=producto_id)
         user=User.objects.get(id=trabajador_id)
-        trabajadoruser=Trabajador.objects.get(id=user.pk)
-        ordendetrabajo.trabajador_id=trabajadoruser.pk
+        trabajadoruser=Trabajador.objects.get(user=user)
+        ordendetrabajo.trabajador=trabajadoruser
         producto=Productos.objects.get(pk=producto_id)
         producto.fecha_elaboracion=fecha_elaboracion
         producto.fecha_vencimiento=fecha_vencimiento
