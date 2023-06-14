@@ -71,7 +71,7 @@ def ordentrabajo_list_rest(request):
             orden_trabajo_data = {
                 'id': orden_trabajo.id,
                 'admin': orden_trabajo.admin.id,
-                'trabajador': orden_trabajo.trabajador_id,
+                'trabajador': orden_trabajo.trabajador,
                 'insumos_utilizados': insumos_data
             }
             ordenes_trabajo_data.append(orden_trabajo_data)
