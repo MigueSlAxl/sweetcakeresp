@@ -11,7 +11,7 @@ class OrdenTrabajo(models.Model):
     admin=models.ForeignKey(User,on_delete=models.CASCADE)
     producto = models.ForeignKey(Productos, on_delete=models.CASCADE)
     insumos = models.ManyToManyField(Supplies, through='InsumoOrden')
-    trabajador=models.ForeignKey(Trabajador,on_delete=models.CASCADE,null=True)
+    trabajador=models.CharField(max_length=150,blank=True,null=True)
 
 class InsumoOrden(models.Model):
     orden_trabajo = models.ForeignKey(OrdenTrabajo, on_delete=models.CASCADE)
