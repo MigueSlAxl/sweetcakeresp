@@ -1,0 +1,58 @@
+<html>
+<head>
+    <title>Detalle de Venta</title>
+    <style>
+        body {
+            text-align: center;
+        }
+        .header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        table {
+            text-align: left;
+            margin: 0 auto;
+            border: 1px solid #000;
+        }
+        th{
+            color: aliceblue;
+            background: #000000;
+        }
+        th,td{
+            width: 25%;
+            text-align: left;
+            vertical-align: top;
+            border: 1px solid #000;
+            border-collapse: collapse;
+            padding: 0.3em;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Sweet Cake</h2>
+    </div>
+    <h1>Detalle de Venta</h1>
+    <p>Vendedor: {{ detalle_venta.vendedor }}</p>
+    <p>Fecha: {{ detalle_venta.fecha }}</p>
+    <p>Local: {{ detalle_venta.local }}</p>
+    <table>
+        <tr>
+            <th>Nombre</th>
+            <th>Cantidad</th>
+            <th>Precio Unitario</th>
+            <th>Total Producto</th>
+        </tr>
+        {% for producto in detalle_venta.productos %}
+        <tr>
+            <td>{{ producto.nombre }}</td>
+            <td>{{ producto.cantidad }}</td>
+            <td>{{ producto.precio_unitario }}</td>
+            <td>{{ producto.total_producto }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <p>Total Venta: {{ detalle_venta.total }}</p>
+</body>
+</html>
