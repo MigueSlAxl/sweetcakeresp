@@ -120,7 +120,7 @@ def ordentrabajo_edit_rest(request):
         ordendetrabajo = OrdenTrabajo.objects.get(producto_id=producto_id)
         user=User.objects.get(id=trabajador_id)
         trabajadoruser=Trabajador.objects.get(id=user.pk)
-        ordendetrabajo.trabajador=trabajadoruser
+        ordendetrabajo.trabajador_id=trabajadoruser
         producto=Productos.objects.get(pk=producto_id)
         producto.fecha_elaboracion=fecha_elaboracion
         producto.fecha_vencimiento=fecha_vencimiento
